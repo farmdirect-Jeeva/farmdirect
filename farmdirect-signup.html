@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FarmDirect — Farmer Sign Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --green-dark: #1a4a2e;
+    --green-mid: #2d7a4f;
+    --green-light: #4caf72;
+    --green-pale: #e8f5ed;
+    --yellow: #f5c842;
+    --orange: #e8854a;
+    --brown: #7a4f2d;
+    --cream: #fdf6e3;
+    --white: #ffffff;
+    --text-dark: #1a2e1a;
+    --text-mid: #3d5a3d;
+    --text-light: #7a9a7a;
+    --border: #d4e8d4;
+    --error: #e84a4a;
+    --success: #2d7a4f;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Mukta', sans-serif;
+    background: linear-gradient(135deg, #0d3320 0%, #1a4a2e 40%, #1e5535 100%);
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    padding: 24px 16px 60px;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    width: 100%; max-width: 560px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
+    animation: fadeDown 0.5s ease both;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; font-weight: 900; color: white;
+  }
+  .logo span { color: var(--yellow); }
+  .lang-selector {
+    display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;
+  }
+  .lang-btn {
+    background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 4px 10px; border-radius: 50px;
+    font-size: 0.72rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; font-family: 'Mukta', sans-serif;
+  }
+  .lang-btn.active, .lang-btn:hover {
+    background: var(--yellow); color: var(--brown);
+    border-color: var(--yellow);
+  }
+
+  /* CARD */
+  .card {
+    background: white; border-radius: 28px;
+    width: 100%; max-width: 560px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+    overflow: hidden;
+    animation: fadeUp 0.6s ease 0.1s both;
+  }
+
+  /* PROGRESS HEADER */
+  .card-header {
+    background: linear-gradient(135deg, var(--green-dark), #0d3320);
+    padding: 28px 32px 24px;
+  }
+  .steps-indicator {
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 20px;
+  }
+  .step-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700;
+    transition: all 0.3s; flex-shrink: 0;
+  }
+  .step-dot.done { background: var(--yellow); color: var(--brown); }
+  .step-dot.active { background: var(--green-light); color: white; box-shadow: 0 0 0 4px rgba(76,175,114,0.3); }
+  .step-dot.pending { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.4); }
+  .step-line {
+    flex: 1; height: 2px; background: rgba(255,255,255,0.15);
+    transition: background 0.3s;
+  }
+  .step-line.done { background: var(--yellow); }
+  .step-title { color: white; }
+  .step-title h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; font-weight: 900; margin-bottom: 4px;
+  }
+  .step-title p { color: rgba(255,255,255,0.6); font-size: 0.88rem; }
+
+  /* FORM BODY */
+  .card-body { padding: 32px; }
+
+  /* SIGNUP METHOD TABS */
+  .method-tabs {
+    display: flex; background: var(--green-pale);
+    border-radius: 14px; padding: 4px; margin-bottom: 28px;
+  }
+  .method-tab {
+    flex: 1; padding: 10px; border-radius: 10px;
+    text-align: center; cursor: pointer;
+    font-weight: 700; font-size: 0.9rem; color: var(--text-mid);
+    transition: all 0.2s; border: none; background: transparent;
+    font-family: 'Mukta', sans-serif;
+  }
+  .method-tab.active {
+    background: white; color: var(--green-dark);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  /* FORM ELEMENTS */
+  .form-section { display: none; }
+  .form-section.active { display: block; }
+
+  .form-group { margin-bottom: 20px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  label {
+    display: block; font-weight: 700; font-size: 0.88rem;
+    color: var(--text-dark); margin-bottom: 7px;
+  }
+  label .required { color: var(--error); margin-left: 3px; }
+  label .trust-badge {
+    background: rgba(45,122,79,0.1); color: var(--green-mid);
+    font-size: 0.7rem; padding: 2px 8px; border-radius: 50px;
+    margin-left: 6px; font-weight: 600;
+  }
+
+  input, select, textarea {
+    width: 100%; padding: 12px 16px;
+    border: 2px solid var(--border); border-radius: 12px;
+    font-family: 'Mukta', sans-serif; font-size: 0.95rem;
+    color: var(--text-dark); background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--green-mid);
+    box-shadow: 0 0 0 3px rgba(45,122,79,0.12);
+  }
+  input::placeholder { color: var(--text-light); }
+  textarea { resize: none; height: 90px; }
+
+  /* PHOTO UPLOAD */
+  .photo-upload {
+    display: flex; align-items: center; gap: 20px;
+    padding: 20px; border: 2px dashed var(--border);
+    border-radius: 14px; cursor: pointer;
+    transition: all 0.2s; background: var(--cream);
+  }
+  .photo-upload:hover { border-color: var(--green-mid); background: var(--green-pale); }
+  .photo-circle {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--green-light), var(--green-mid));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(45,122,79,0.3);
+  }
+  .photo-text h4 { font-weight: 700; color: var(--text-dark); font-size: 0.95rem; }
+  .photo-text p { font-size: 0.8rem; color: var(--text-light); margin-top: 3px; }
+  .photo-text span { font-size: 0.75rem; color: var(--green-mid); font-weight: 600; }
+
+  /* CROP TAGS */
+  .crop-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .crop-tag {
+    padding: 7px 14px; border-radius: 50px;
+    border: 2px solid var(--border); background: white;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    color: var(--text-mid); transition: all 0.2s;
+    font-family: 'Mukta', sans-serif;
+  }
+  .crop-tag.selected {
+    border-color: var(--green-mid); background: var(--green-pale);
+    color: var(--green-dark);
+  }
+  .crop-tag:hover { border-color: var(--green-light); }
+
+  /* TRUST ITEMS */
+  .trust-section {
+    background: linear-gradient(135deg, #fff8e8, #fef0e8);
+    border: 2px solid rgba(245,200,66,0.3);
+    border-radius: 16px; padding: 20px; margin-bottom: 20px;
+  }
+  .trust-section h4 {
+    font-weight: 800; color: var(--brown); font-size: 0.9rem;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+  }
+  .trust-items { display: flex; flex-direction: column; gap: 12px; }
+  .trust-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; background: white;
+    border-radius: 12px; border: 1px solid rgba(0,0,0,0.06);
+  }
+  .trust-item-icon { font-size: 1.5rem; flex-shrink: 0; }
+  .trust-item-info { flex: 1; }
+  .trust-item-info h5 { font-weight: 700; font-size: 0.88rem; color: var(--text-dark); }
+  .trust-item-info p { font-size: 0.78rem; color: var(--text-light); }
+  .trust-toggle {
+    width: 42px; height: 24px; border-radius: 50px;
+    background: var(--border); position: relative; cursor: pointer;
+    transition: background 0.2s; flex-shrink: 0;
+    border: none;
+  }
+  .trust-toggle.on { background: var(--green-mid); }
+  .trust-toggle::after {
+    content: ''; position: absolute;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: white; top: 3px; left: 3px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .trust-toggle.on::after { transform: translateX(18px); }
+
+  /* OTP BOX */
+  .otp-boxes {
+    display: flex; gap: 10px; justify-content: center; margin: 20px 0;
+  }
+  .otp-box {
+    width: 52px; height: 56px; border-radius: 12px;
+    border: 2px solid var(--border); text-align: center;
+    font-size: 1.4rem; font-weight: 700; color: var(--green-dark);
+    font-family: 'Mukta', sans-serif;
+  }
+  .otp-box:focus { border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(45,122,79,0.12); outline: none; }
+
+  /* BANK SECTION */
+  .bank-note {
+    background: var(--green-pale); border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 20px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .bank-note span { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+  .bank-note p { font-size: 0.82rem; color: var(--text-mid); line-height: 1.5; }
+  .bank-note strong { color: var(--green-dark); }
+
+  /* DIVIDER */
+  .divider {
+    display: flex; align-items: center; gap: 12px; margin: 20px 0;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .divider span { font-size: 0.8rem; color: var(--text-light); font-weight: 600; }
+
+  /* BUTTONS */
+  .btn-next {
+    width: 100%; padding: 15px;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+    color: white; border: none; border-radius: 14px;
+    font-family: 'Mukta', sans-serif; font-size: 1.05rem; font-weight: 700;
+    cursor: pointer; transition: all 0.25s; margin-top: 8px;
+    box-shadow: 0 4px 20px rgba(45,122,79,0.35);
+  }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(45,122,79,0.4); }
+  .btn-back {
+    width: 100%; padding: 12px;
+    background: transparent; color: var(--text-mid);
+    border: 2px solid var(--border); border-radius: 14px;
+    font-family: 'Mukta', sans-serif; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; margin-top: 10px;
+  }
+  .btn-back:hover { border-color: var(--green-mid); color: var(--green-mid); }
+
+  /* SUCCESS SCREEN */
+  .success-screen {
+    text-align: center; padding: 20px 0;
+  }
+  .success-icon {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--green-light), var(--green-mid));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.8rem; margin: 0 auto 24px;
+    box-shadow: 0 8px 28px rgba(45,122,79,0.35);
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  }
+  .success-screen h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; font-weight: 900;
+    color: var(--green-dark); margin-bottom: 10px;
+  }
+  .success-screen p { color: var(--text-mid); font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; }
+  .verified-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 20px 0; }
+  .v-badge {
+    background: var(--green-pale); color: var(--green-dark);
+    padding: 6px 14px; border-radius: 50px;
+    font-size: 0.82rem; font-weight: 700;
+    border: 1px solid rgba(45,122,79,0.2);
+  }
+  .profile-preview {
+    background: var(--cream); border-radius: 16px;
+    padding: 20px; margin: 20px 0; text-align: left;
+    border: 2px solid var(--border);
+  }
+  .profile-preview-top {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 14px;
+  }
+  .pp-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--green-light), var(--green-mid));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+  }
+  .pp-name { font-weight: 800; color: var(--text-dark); font-size: 1rem; }
+  .pp-location { font-size: 0.82rem; color: var(--text-mid); margin-top: 2px; }
+  .pp-crops { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pp-crop {
+    background: white; border: 1px solid var(--border);
+    padding: 4px 10px; border-radius: 50px;
+    font-size: 0.78rem; font-weight: 600; color: var(--text-mid);
+  }
+
+  /* HELPER TEXT */
+  .helper { font-size: 0.78rem; color: var(--text-light); margin-top: 5px; }
+  .helper.success-text { color: var(--success); }
+
+  /* STEP CONTENT PANELS */
+  .step-panel { display: none; }
+  .step-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeIn { from { opacity:0; transform:translateX(10px); } to { opacity:1; transform:translateX(0); } }
+  @keyframes popIn { from { opacity:0; transform:scale(0.5); } to { opacity:1; transform:scale(1); } }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    height: 4px; background: rgba(255,255,255,0.15);
+    border-radius: 2px; margin-top: 16px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--yellow);
+    border-radius: 2px; transition: width 0.4s ease;
+  }
+
+  /* AADHAAR */
+  .aadhaar-note {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: #fff8e8; border: 1px solid rgba(245,200,66,0.4);
+    border-radius: 10px; padding: 12px; margin-top: 8px;
+  }
+  .aadhaar-note p { font-size: 0.78rem; color: var(--brown); line-height: 1.5; }
+
+  @media(max-width:480px){
+    .card-body { padding: 24px 20px; }
+    .form-row { grid-template-columns: 1fr; }
+    .otp-box { width: 44px; height: 50px; font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">🌾 Farm<span>Direct</span></div>
+  <div class="lang-selector">
+    <button class="lang-btn active" onclick="setLang(this,'EN')">EN</button>
+    <button class="lang-btn" onclick="setLang(this,'हि')">हि</button>
+    <button class="lang-btn" onclick="setLang(this,'தமிழ்')">தமிழ்</button>
+    <button class="lang-btn" onclick="setLang(this,'తెలుగు')">తెలుగు</button>
+    <button class="lang-btn" onclick="setLang(this,'ಕನ್ನಡ')">ಕನ್ನಡ</button>
+    <button class="lang-btn" onclick="setLang(this,'മലയാളം')">മലയാളം</button>
+  </div>
+</div>
+
+<!-- MAIN CARD -->
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="card-header">
+    <div class="steps-indicator">
+      <div class="step-dot active" id="dot1">1</div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-dot pending" id="dot2">2</div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-dot pending" id="dot3">3</div>
+      <div class="step-line" id="line3"></div>
+      <div class="step-dot pending" id="dot4">4</div>
+      <div class="step-line" id="line4"></div>
+      <div class="step-dot pending" id="dot5">✓</div>
+    </div>
+    <div class="step-title">
+      <h2 id="stepTitle">Sign Up as Farmer 👨‍🌾</h2>
+      <p id="stepSubtitle">Step 1 of 4 — Create your account</p>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:20%"></div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="card-body">
+
+    <!-- STEP 1: SIGN UP METHOD -->
+    <div class="step-panel active" id="panel1">
+      <div class="method-tabs">
+        <button class="method-tab active" onclick="switchMethod('mobile',this)">📱 Mobile OTP</button>
+        <button class="method-tab" onclick="switchMethod('email',this)">📧 Email & Password</button>
+      </div>
+
+      <!-- MOBILE OTP -->
+      <div class="form-section active" id="mobileSection">
+        <div class="form-group">
+          <label>Mobile Number <span class="required">*</span></label>
+          <div style="display:flex;gap:10px">
+            <input style="width:70px;text-align:center;flex-shrink:0" value="+91" readonly/>
+            <input type="tel" placeholder="Enter 10-digit number" maxlength="10" id="mobileInput"/>
+          </div>
+          <p class="helper">We'll send a 6-digit OTP to verify your number</p>
+        </div>
+        <button class="btn-next" onclick="sendOTP()">📲 Send OTP</button>
+
+        <!-- OTP INPUT (hidden initially) -->
+        <div id="otpSection" style="display:none;margin-top:20px">
+          <div class="divider"><span>Enter OTP sent to your number</span></div>
+          <div class="otp-boxes">
+            <input class="otp-box" maxlength="1" oninput="otpMove(this,1)"/>
+            <input class="otp-box" maxlength="1" oninput="otpMove(this,2)"/>
+            <input class="otp-box" maxlength="1" oninput="otpMove(this,3)"/>
+            <input class="otp-box" maxlength="1" oninput="otpMove(this,4)"/>
+            <input class="otp-box" maxlength="1" oninput="otpMove(this,5)"/>
+            <input class="otp-box" maxlength="1" oninput="otpMove(this,6)"/>
+          </div>
+          <p class="helper" style="text-align:center">Didn't receive? <a href="#" style="color:var(--green-mid);font-weight:700">Resend OTP</a></p>
+          <button class="btn-next" onclick="nextStep(2)">✅ Verify & Continue</button>
+        </div>
+      </div>
+
+      <!-- EMAIL -->
+      <div class="form-section" id="emailSection">
+        <div class="form-group">
+          <label>Email Address <span class="required">*</span></label>
+          <input type="email" placeholder="yourname@email.com"/>
+        </div>
+        <div class="form-group">
+          <label>Create Password <span class="required">*</span></label>
+          <input type="password" placeholder="Minimum 8 characters"/>
+          <p class="helper">Use a mix of letters, numbers and symbols</p>
+        </div>
+        <div class="form-group">
+          <label>Confirm Password <span class="required">*</span></label>
+          <input type="password" placeholder="Re-enter your password"/>
+        </div>
+        <button class="btn-next" onclick="nextStep(2)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: PERSONAL & FARM DETAILS -->
+    <div class="step-panel" id="panel2">
+      <!-- PHOTO -->
+      <div class="form-group">
+        <label>Your Photo <span class="trust-badge">🛡️ Builds Trust</span></label>
+        <div class="photo-upload" onclick="this.style.borderColor='var(--green-mid)'">
+          <div class="photo-circle">👨‍🌾</div>
+          <div class="photo-text">
+            <h4>Upload Your Photo</h4>
+            <p>Buyers trust farmers with photos 3x more</p>
+            <span>Tap to upload from gallery →</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name <span class="required">*</span></label>
+          <input type="text" placeholder="e.g. Rajan"/>
+        </div>
+        <div class="form-group">
+          <label>Last Name <span class="required">*</span></label>
+          <input type="text" placeholder="e.g. Kumar"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Farm Name <span class="required">*</span></label>
+        <input type="text" placeholder="e.g. Rajan's Green Farm"/>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>State <span class="required">*</span></label>
+          <select>
+            <option value="">Select State</option>
+            <option>Tamil Nadu</option>
+            <option>Andhra Pradesh</option>
+            <option>Telangana</option>
+            <option>Karnataka</option>
+            <option>Kerala</option>
+            <option>Maharashtra</option>
+            <option>Punjab</option>
+            <option>Uttar Pradesh</option>
+            <option>Rajasthan</option>
+            <option>Gujarat</option>
+            <option>West Bengal</option>
+            <option>Madhya Pradesh</option>
+            <option>Bihar</option>
+            <option>Odisha</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>District <span class="required">*</span></label>
+          <input type="text" placeholder="e.g. Coimbatore"/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Village / Town</label>
+          <input type="text" placeholder="Your village name"/>
+        </div>
+        <div class="form-group">
+          <label>Farm Size (acres)</label>
+          <input type="number" placeholder="e.g. 5"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>About Your Farm</label>
+        <textarea placeholder="Tell buyers a little about your farm, your farming methods, how long you've been farming..."></textarea>
+      </div>
+
+      <button class="btn-next" onclick="nextStep(3)">Continue →</button>
+      <button class="btn-back" onclick="nextStep(1)">← Back</button>
+    </div>
+
+    <!-- STEP 3: CROPS + TRUST VERIFICATION -->
+    <div class="step-panel" id="panel3">
+
+      <div class="form-group">
+        <label>What crops do you grow? <span class="required">*</span></label>
+        <p class="helper" style="margin-bottom:10px">Select all that apply — you can add more later</p>
+        <div class="crop-tags">
+          <button class="crop-tag" onclick="toggleCrop(this)">🍅 Tomatoes</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">🧅 Onions</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">🥬 Spinach</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">🥕 Carrots</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">🌶️ Chilli</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">🍆 Brinjal</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">🥔 Potatoes</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">🌽 Corn</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">🍌 Bananas</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">🥭 Mangoes</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">🍚 Rice</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">🌾 Wheat</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">🥛 Dairy</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">🌿 Herbs</button>
+          <button class="crop-tag" onclick="toggleCrop(this)">➕ Add More</button>
+        </div>
+      </div>
+
+      <!-- TRUST VERIFICATION -->
+      <div class="trust-section">
+        <h4>🛡️ Trust & Verification — Earn Verified Badge</h4>
+        <div class="trust-items">
+          <div class="trust-item">
+            <div class="trust-item-icon">🪪</div>
+            <div class="trust-item-info">
+              <h5>Aadhaar Verification</h5>
+              <p>Confirms your identity — buyers trust verified farmers 5x more</p>
+            </div>
+            <button class="trust-toggle on" onclick="toggleTrust(this)"></button>
+          </div>
+          <div class="trust-item">
+            <div class="trust-item-icon">📍</div>
+            <div class="trust-item-info">
+              <h5>GPS Farm Location</h5>
+              <p>Pin your exact farm on map — show buyers where their food comes from</p>
+            </div>
+            <button class="trust-toggle on" onclick="toggleTrust(this)"></button>
+          </div>
+          <div class="trust-item">
+            <div class="trust-item-icon">📸</div>
+            <div class="trust-item-info">
+              <h5>Farm Photo Verification</h5>
+              <p>Upload real photos of your farm and crops for authenticity</p>
+            </div>
+            <button class="trust-toggle" onclick="toggleTrust(this)"></button>
+          </div>
+          <div class="trust-item">
+            <div class="trust-item-icon">📜</div>
+            <div class="trust-item-info">
+              <h5>Farmer ID / PM-Kisan ID</h5>
+              <p>Government-registered farmer ID gives you official verified status</p>
+            </div>
+            <button class="trust-toggle" onclick="toggleTrust(this)"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="aadhaar-note">
+        <p>🔒 <strong>Your data is safe.</strong> We only use Aadhaar/ID to verify your identity. We never store or share your ID number with anyone. This follows Government of India data protection rules.</p>
+      </div>
+
+      <button class="btn-next" onclick="nextStep(4)">Continue →</button>
+      <button class="btn-back" onclick="nextStep(2)">← Back</button>
+    </div>
+
+    <!-- STEP 4: BANK ACCOUNT -->
+    <div class="step-panel" id="panel4">
+      <div class="bank-note">
+        <span>💰</span>
+        <p><strong>Your payment goes directly to your bank account.</strong> FarmDirect charges zero commission. Every rupee the buyer pays — you receive. Payments are sent within 24 hours of delivery.</p>
+      </div>
+
+      <div class="form-group">
+        <label>Account Holder Name <span class="required">*</span></label>
+        <input type="text" placeholder="Name as on bank account"/>
+      </div>
+
+      <div class="form-group">
+        <label>Bank Account Number <span class="required">*</span></label>
+        <input type="text" placeholder="Enter your account number"/>
+      </div>
+
+      <div class="form-group">
+        <label>Confirm Account Number <span class="required">*</span></label>
+        <input type="text" placeholder="Re-enter account number"/>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>IFSC Code <span class="required">*</span></label>
+          <input type="text" placeholder="e.g. SBIN0001234" style="text-transform:uppercase"/>
+          <p class="helper">Found on your cheque book or passbook</p>
+        </div>
+        <div class="form-group">
+          <label>Bank Name</label>
+          <input type="text" placeholder="e.g. SBI, Canara" readonly id="bankNameField"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>UPI ID (Optional)</label>
+        <input type="text" placeholder="yourname@upi"/>
+        <p class="helper">Add UPI for instant payments from buyers</p>
+      </div>
+
+      <div class="bank-note" style="background:var(--green-pale);border-color:rgba(45,122,79,0.3)">
+        <span>🔒</span>
+        <p>Your bank details are encrypted and stored securely. FarmDirect uses <strong>bank-grade 256-bit SSL encryption</strong>. We never share your details.</p>
+      </div>
+
+      <button class="btn-next" onclick="completeSignup()">🌾 Complete Registration!</button>
+      <button class="btn-back" onclick="nextStep(3)">← Back</button>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="step-panel" id="panel5">
+      <div class="success-screen">
+        <div class="success-icon">🌾</div>
+        <h2>Welcome to FarmDirect!</h2>
+        <p>You're now a verified FarmDirect farmer. Start listing your produce and connect with thousands of buyers directly across India!</p>
+
+        <div class="verified-badges">
+          <div class="v-badge">✅ Identity Verified</div>
+          <div class="v-badge">📍 Location Added</div>
+          <div class="v-badge">💰 Payment Ready</div>
+          <div class="v-badge">🌾 Farmer Certified</div>
+        </div>
+
+        <div class="profile-preview">
+          <div class="profile-preview-top">
+            <div class="pp-avatar">👨‍🌾</div>
+            <div>
+              <div class="pp-name">Your Farm Profile ✅</div>
+              <div class="pp-location">📍 Your District, Your State</div>
+            </div>
+          </div>
+          <div class="pp-crops">
+            <span class="pp-crop">🍅 Tomatoes</span>
+            <span class="pp-crop">🧅 Onions</span>
+            <span class="pp-crop">🌶️ Chilli</span>
+            <span class="pp-crop">+ more</span>
+          </div>
+        </div>
+
+        <button class="btn-next" style="margin-top:8px" onclick="alert('Taking you to your dashboard! 🌾')">
+          🚀 Go to My Dashboard
+        </button>
+        <p style="font-size:0.82rem;color:var(--text-light);margin-top:14px">
+          Your profile is being reviewed. You'll be live within <strong>2 hours</strong>! 🎉
+        </p>
+      </div>
+    </div>
+
+  </div><!-- end card-body -->
+</div><!-- end card -->
+
+<p style="color:rgba(255,255,255,0.4);font-size:0.8rem;margin-top:20px;text-align:center">
+  🔒 Secured by FarmDirect · Data protected under IT Act 2000 India
+</p>
+
+<script>
+  let currentStep = 1;
+
+  const titles = [
+    '', // 0 unused
+    'Sign Up as Farmer 👨‍🌾',
+    'Your Profile & Farm Details 🏡',
+    'Your Crops & Verification 🌱',
+    'Bank Account for Payments 💰',
+    'You\'re All Set! 🎉'
+  ];
+  const subtitles = [
+    '',
+    'Step 1 of 4 — Create your account',
+    'Step 2 of 4 — Tell us about yourself',
+    'Step 3 of 4 — Crops & trust badges',
+    'Step 4 of 4 — Receive your payments',
+    'Registration complete!'
+  ];
+  const progress = ['','20%','45%','68%','88%','100%'];
+
+  function nextStep(n) {
+    document.getElementById('panel' + currentStep).classList.remove('active');
+    document.getElementById('dot' + currentStep).className = 'step-dot done';
+    if (currentStep < 5) document.getElementById('line' + currentStep).className = 'step-line done';
+    currentStep = n;
+    document.getElementById('panel' + n).classList.add('active');
+    document.getElementById('dot' + n).className = 'step-dot active';
+    document.getElementById('stepTitle').textContent = titles[n];
+    document.getElementById('stepSubtitle').textContent = subtitles[n];
+    document.getElementById('progressFill').style.width = progress[n];
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function completeSignup() { nextStep(5); }
+
+  function switchMethod(type, btn) {
+    document.querySelectorAll('.method-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('mobileSection').classList.toggle('active', type === 'mobile');
+    document.getElementById('emailSection').classList.toggle('active', type === 'email');
+  }
+
+  function sendOTP() {
+    const num = document.getElementById('mobileInput').value;
+    if (num.length === 10) {
+      document.getElementById('otpSection').style.display = 'block';
+      document.getElementById('otpSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      alert('Please enter a valid 10-digit mobile number');
+    }
+  }
+
+  function otpMove(el, idx) {
+    if (el.value.length === 1) {
+      const boxes = document.querySelectorAll('.otp-box');
+      if (idx < 6) boxes[idx].focus();
+    }
+  }
+
+  function toggleCrop(btn) {
+    btn.classList.toggle('selected');
+  }
+
+  function toggleTrust(btn) {
+    btn.classList.toggle('on');
+  }
+
+  function setLang(btn, lang) {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    // In real app, this would switch all UI text to selected language
+    const msgs = {
+      'हि': 'हिंदी भाषा चुनी गई! पूरा ऐप हिंदी में होगा।',
+      'தமிழ்': 'தமிழ் மொழி தேர்ந்தெடுக்கப்பட்டது!',
+      'తెలుగు': 'తెలుగు భాష ఎంచుకోబడింది!',
+      'ಕನ್ನಡ': 'ಕನ್ನಡ ಭಾಷೆ ಆಯ್ಕೆಯಾಗಿದೆ!',
+      'മലയാളം': 'മലയാളം ഭാഷ തിരഞ്ഞെടുത്തു!'
+    };
+    if (msgs[lang]) alert('🌐 ' + msgs[lang] + '\n\n(Full language support coming in production build!)');
+  }
+</script>
+</body>
+</html>

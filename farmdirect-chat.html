@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FarmDirect — Chat</title>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --green-dark:#1a4a2e; --green-mid:#2d7a4f; --green-light:#4caf72;
+    --green-pale:#e8f5ed; --yellow:#f5c842; --orange:#e8854a;
+    --brown:#7a4f2d; --cream:#fdf6e3; --white:#fff;
+    --text-dark:#1a2e1a; --text-mid:#3d5a3d; --text-light:#7a9a7a;
+    --border:#d4e8d4; --red:#e84a4a; --blue:#3a7bd5;
+    --bubble-farmer:#e8f5ed; --bubble-buyer:#1a4a2e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Mukta',sans-serif;background:#f0f4f0;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+  /* ── TOP BAR ── */
+  .topbar{
+    background:var(--green-dark);padding:12px 16px;
+    display:flex;align-items:center;gap:12px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.25);flex-shrink:0;
+    position:relative;z-index:10;
+  }
+  .back-btn{background:rgba(255,255,255,0.12);border:none;color:white;width:36px;height:36px;border-radius:10px;font-size:1rem;cursor:pointer;flex-shrink:0;}
+  .chat-user{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+  .chat-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#f5c842,#e8854a);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;position:relative;}
+  .online-dot{position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:#4caf72;border:2px solid var(--green-dark);}
+  .chat-user-info{min-width:0;}
+  .chat-user-name{color:white;font-weight:800;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chat-user-sub{color:rgba(255,255,255,0.6);font-size:0.72rem;margin-top:1px;}
+  .topbar-actions{display:flex;gap:8px;flex-shrink:0;}
+  .top-action-btn{background:rgba(255,255,255,0.12);border:none;color:white;width:36px;height:36px;border-radius:10px;font-size:1rem;cursor:pointer;transition:background 0.2s;}
+  .top-action-btn:hover{background:rgba(255,255,255,0.22);}
+
+  /* ── ORDER CARD ── */
+  .order-banner{
+    background:white;border-bottom:1px solid var(--border);
+    padding:10px 16px;display:flex;align-items:center;gap:12px;
+    flex-shrink:0;cursor:pointer;transition:background 0.2s;
+  }
+  .order-banner:hover{background:var(--green-pale);}
+  .order-icon{font-size:1.6rem;flex-shrink:0;}
+  .order-info{flex:1;min-width:0;}
+  .order-info h4{font-weight:800;font-size:0.85rem;color:var(--text-dark);}
+  .order-info p{font-size:0.72rem;color:var(--text-mid);margin-top:1px;}
+  .order-status{padding:4px 12px;border-radius:50px;font-size:0.72rem;font-weight:800;flex-shrink:0;}
+  .order-status.pending{background:#fff8e8;color:var(--brown);}
+  .order-status.confirmed{background:var(--green-pale);color:var(--green-dark);}
+
+  /* ── PRICE COMPARISON BAR ── */
+  .price-bar{
+    background:linear-gradient(135deg,#fff8e8,#fef0e8);
+    border-bottom:1px solid rgba(245,200,66,0.3);
+    padding:8px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;
+  }
+  .price-bar-icon{font-size:1.1rem;flex-shrink:0;}
+  .price-bar-text{flex:1;font-size:0.76rem;color:var(--brown);font-weight:600;}
+  .price-bar-vals{display:flex;gap:12px;flex-shrink:0;}
+  .pval{text-align:center;}
+  .pval-num{font-size:0.88rem;font-weight:800;}
+  .pval-num.mandi{color:var(--orange);}
+  .pval-num.yours{color:var(--green-mid);}
+  .pval-num.retail{color:var(--red);}
+  .pval-label{font-size:0.6rem;color:var(--text-light);font-weight:600;}
+
+  /* ── LANG SELECTOR BAR ── */
+  .lang-bar{
+    background:white;border-bottom:1px solid var(--border);
+    padding:8px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;
+  }
+  .lang-bar::-webkit-scrollbar{display:none;}
+  .lang-bar-label{font-size:0.72rem;font-weight:700;color:var(--text-light);white-space:nowrap;flex-shrink:0;}
+  .lang-pill{padding:5px 12px;border-radius:50px;border:2px solid var(--border);background:white;font-size:0.72rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all 0.2s;font-family:'Mukta',sans-serif;color:var(--text-mid);}
+  .lang-pill.active{background:var(--green-dark);border-color:var(--green-dark);color:white;}
+  .lang-pill:hover:not(.active){border-color:var(--green-mid);color:var(--green-mid);}
+
+  /* ── MESSAGES AREA ── */
+  .messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;}
+  .messages::-webkit-scrollbar{width:4px;}
+  .messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+  /* DATE DIVIDER */
+  .date-divider{text-align:center;margin:4px 0;}
+  .date-divider span{background:rgba(0,0,0,0.08);color:var(--text-light);font-size:0.7rem;font-weight:700;padding:3px 12px;border-radius:50px;}
+
+  /* MESSAGE ROW */
+  .msg-row{display:flex;gap:8px;align-items:flex-end;max-width:85%;}
+  .msg-row.farmer{align-self:flex-start;}
+  .msg-row.buyer{align-self:flex-end;flex-direction:row-reverse;}
+  .msg-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;margin-bottom:2px;}
+  .msg-avatar.farmer-av{background:linear-gradient(135deg,var(--green-light),var(--green-mid));}
+  .msg-avatar.buyer-av{background:linear-gradient(135deg,var(--yellow),var(--orange));}
+
+  /* BUBBLE */
+  .bubble-wrap{display:flex;flex-direction:column;gap:4px;}
+  .bubble{padding:10px 14px;border-radius:18px;position:relative;max-width:100%;}
+  .farmer .bubble{background:white;border-radius:4px 18px 18px 18px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+  .buyer .bubble{background:var(--green-dark);border-radius:18px 4px 18px 18px;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+  .bubble-text{font-size:0.88rem;line-height:1.5;color:var(--text-dark);}
+  .buyer .bubble-text{color:white;}
+  .bubble-time{font-size:0.65rem;color:var(--text-light);margin-top:4px;display:flex;align-items:center;gap:4px;}
+  .buyer .bubble-time{color:rgba(255,255,255,0.5);justify-content:flex-end;}
+  .read-tick{font-size:0.7rem;color:var(--green-light);}
+
+  /* TRANSLATION BADGE */
+  .translate-btn{
+    display:inline-flex;align-items:center;gap:4px;
+    background:rgba(45,122,79,0.1);border:1px solid rgba(45,122,79,0.2);
+    color:var(--green-mid);padding:3px 8px;border-radius:50px;
+    font-size:0.68rem;font-weight:700;cursor:pointer;margin-top:6px;
+    transition:all 0.2s;border:none;font-family:'Mukta',sans-serif;
+  }
+  .translate-btn:hover{background:rgba(45,122,79,0.2);}
+  .buyer .translate-btn{background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);}
+  .buyer .translate-btn:hover{background:rgba(255,255,255,0.25);}
+  .translated-text{
+    margin-top:6px;padding:6px 10px;border-radius:10px;
+    font-size:0.8rem;line-height:1.5;font-style:italic;display:none;
+  }
+  .farmer .translated-text{background:var(--green-pale);color:var(--green-dark);border-left:3px solid var(--green-mid);}
+  .buyer .translated-text{background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.9);border-left:3px solid rgba(255,255,255,0.4);}
+  .translated-text.show{display:block;}
+  .trans-label{font-size:0.65rem;font-weight:700;opacity:0.7;margin-bottom:3px;}
+
+  /* VOICE MESSAGE BUBBLE */
+  .voice-bubble{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:18px;min-width:180px;}
+  .farmer .voice-bubble{background:white;border-radius:4px 18px 18px 18px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+  .buyer .voice-bubble{background:var(--green-dark);border-radius:18px 4px 18px 18px;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+  .voice-play{width:36px;height:36px;border-radius:50%;border:none;font-size:1rem;cursor:pointer;flex-shrink:0;transition:all 0.2s;}
+  .farmer .voice-play{background:var(--green-mid);color:white;}
+  .buyer .voice-play{background:rgba(255,255,255,0.2);color:white;}
+  .voice-play:hover{transform:scale(1.1);}
+  .voice-wave{flex:1;display:flex;align-items:center;gap:2px;height:28px;}
+  .wave-bar{background:var(--green-mid);border-radius:2px;width:3px;animation:none;}
+  .buyer .wave-bar{background:rgba(255,255,255,0.6);}
+  .voice-dur{font-size:0.72rem;font-weight:700;flex-shrink:0;}
+  .farmer .voice-dur{color:var(--text-light);}
+  .buyer .voice-dur{color:rgba(255,255,255,0.6);}
+  .voice-trans-btn{
+    display:flex;align-items:center;gap:4px;margin-top:5px;
+    background:none;border:none;cursor:pointer;padding:0;
+    font-family:'Mukta',sans-serif;font-size:0.7rem;font-weight:700;
+  }
+  .farmer .voice-trans-btn{color:var(--green-mid);}
+  .buyer .voice-trans-btn{color:rgba(255,255,255,0.7);}
+
+  /* PHOTO BUBBLE */
+  .photo-bubble{border-radius:14px;overflow:hidden;max-width:220px;cursor:pointer;position:relative;}
+  .photo-bubble-img{
+    width:100%;height:160px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:5rem;position:relative;
+  }
+  .photo-bubble-caption{padding:8px 10px;font-size:0.78rem;}
+  .farmer .photo-bubble{background:white;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+  .buyer .photo-bubble{background:var(--green-dark);}
+  .farmer .photo-bubble-caption{color:var(--text-mid);}
+  .buyer .photo-bubble-caption{color:rgba(255,255,255,0.7);}
+
+  /* ORDER STATUS MESSAGE */
+  .status-msg{
+    align-self:center;background:white;border-radius:14px;
+    padding:12px 16px;border:2px solid var(--border);
+    max-width:300px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  }
+  .status-msg .sm-icon{font-size:1.8rem;margin-bottom:6px;}
+  .status-msg h4{font-weight:800;font-size:0.88rem;color:var(--text-dark);}
+  .status-msg p{font-size:0.75rem;color:var(--text-mid);margin-top:3px;}
+  .status-msg .sm-steps{display:flex;justify-content:center;gap:4px;margin-top:10px;flex-wrap:wrap;}
+  .sm-step{padding:3px 8px;border-radius:50px;font-size:0.65rem;font-weight:700;}
+  .sm-step.done{background:var(--green-pale);color:var(--green-dark);}
+  .sm-step.active{background:var(--green-mid);color:white;}
+  .sm-step.pending{background:#f4f7f4;color:var(--text-light);}
+
+  /* PRICE NEGOTIATION BUBBLE */
+  .nego-bubble{
+    background:linear-gradient(135deg,#fff8e8,#fef0e8);
+    border:2px solid rgba(245,200,66,0.4);
+    border-radius:14px;padding:14px;max-width:260px;
+  }
+  .nego-title{font-weight:800;font-size:0.85rem;color:var(--brown);margin-bottom:10px;}
+  .nego-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .nego-label{font-size:0.75rem;color:var(--text-mid);}
+  .nego-val{font-weight:800;font-size:0.9rem;}
+  .nego-val.market{color:var(--red);}
+  .nego-val.farmer{color:var(--green-mid);}
+  .nego-val.offer{color:var(--orange);}
+  .nego-btns{display:flex;gap:8px;margin-top:12px;}
+  .nego-btn{flex:1;padding:8px;border-radius:10px;border:none;font-family:'Mukta',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;transition:all 0.2s;}
+  .nego-btn.accept{background:var(--green-mid);color:white;}
+  .nego-btn.accept:hover{background:var(--green-dark);}
+  .nego-btn.counter{background:white;color:var(--brown);border:2px solid rgba(245,200,66,0.5);}
+  .nego-btn.counter:hover{background:#fff8e8;}
+
+  /* QUICK REPLIES */
+  .quick-replies{
+    padding:10px 16px;display:flex;gap:8px;overflow-x:auto;
+    scrollbar-width:none;background:white;border-top:1px solid var(--border);flex-shrink:0;
+  }
+  .quick-replies::-webkit-scrollbar{display:none;}
+  .qr-chip{
+    padding:7px 14px;border-radius:50px;border:2px solid var(--border);
+    background:white;font-size:0.78rem;font-weight:700;cursor:pointer;
+    white-space:nowrap;flex-shrink:0;color:var(--text-mid);
+    transition:all 0.2s;font-family:'Mukta',sans-serif;
+  }
+  .qr-chip:hover{border-color:var(--green-mid);color:var(--green-mid);background:var(--green-pale);}
+
+  /* ── INPUT BAR ── */
+  .input-bar{
+    background:white;border-top:1px solid var(--border);
+    padding:12px 16px;flex-shrink:0;
+  }
+  .input-row{display:flex;align-items:flex-end;gap:8px;}
+  .input-actions{display:flex;gap:6px;flex-shrink:0;}
+  .input-action{background:#f4f7f4;border:none;width:38px;height:38px;border-radius:12px;font-size:1rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;}
+  .input-action:hover{background:var(--green-pale);}
+  .input-action.recording{background:var(--red);animation:pulse 0.8s ease infinite;}
+  .msg-input-wrap{flex:1;position:relative;}
+  .msg-input{
+    width:100%;padding:10px 14px;border:2px solid var(--border);
+    border-radius:20px;font-family:'Mukta',sans-serif;font-size:0.9rem;
+    resize:none;outline:none;max-height:100px;line-height:1.4;
+    transition:border-color 0.2s;
+  }
+  .msg-input:focus{border-color:var(--green-mid);}
+  .send-btn{
+    background:var(--green-mid);border:none;width:42px;height:42px;
+    border-radius:50%;color:white;font-size:1.1rem;cursor:pointer;
+    flex-shrink:0;transition:all 0.2s;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 12px rgba(45,122,79,0.4);
+  }
+  .send-btn:hover{background:var(--green-dark);transform:scale(1.05);}
+
+  /* TRANSLATE MODAL */
+  .trans-modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;
+    display:flex;align-items:flex-end;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity 0.3s;
+  }
+  .trans-modal-overlay.show{opacity:1;pointer-events:all;}
+  .trans-modal{
+    background:white;border-radius:24px 24px 0 0;width:100%;max-width:600px;
+    padding:0 0 40px;transform:translateY(100%);transition:transform 0.3s ease;
+    max-height:80vh;overflow-y:auto;
+  }
+  .trans-modal-overlay.show .trans-modal{transform:translateY(0);}
+  .tm-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0;}
+  .tm-head{padding:20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .tm-head h3{font-weight:800;font-size:1rem;color:var(--text-dark);}
+  .tm-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-light);}
+  .tm-body{padding:20px;}
+  .tm-original{background:var(--cream);border-radius:12px;padding:14px;margin-bottom:16px;}
+  .tm-original-label{font-size:0.72rem;font-weight:700;color:var(--text-light);margin-bottom:6px;}
+  .tm-original-text{font-size:0.92rem;color:var(--text-dark);line-height:1.6;}
+  .tm-langs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+  .tm-lang{padding:8px 16px;border-radius:50px;border:2px solid var(--border);background:white;font-size:0.82rem;font-weight:700;cursor:pointer;color:var(--text-mid);transition:all 0.2s;font-family:'Mukta',sans-serif;}
+  .tm-lang.active{background:var(--green-dark);border-color:var(--green-dark);color:white;}
+  .tm-result{background:var(--green-pale);border-radius:12px;padding:14px;border-left:4px solid var(--green-mid);display:none;}
+  .tm-result.show{display:block;}
+  .tm-result-label{font-size:0.72rem;font-weight:700;color:var(--green-mid);margin-bottom:6px;}
+  .tm-result-text{font-size:0.95rem;color:var(--green-dark);line-height:1.7;font-weight:600;}
+  .tm-voice-btn{
+    width:100%;margin-top:12px;padding:12px;
+    background:var(--green-mid);color:white;border:none;border-radius:12px;
+    font-family:'Mukta',sans-serif;font-size:0.92rem;font-weight:700;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .tm-voice-btn:hover{background:var(--green-dark);}
+
+  /* REPORT MODAL */
+  .report-modal{
+    position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+    opacity:0;pointer-events:none;transition:opacity 0.3s;
+  }
+  .report-modal.show{opacity:1;pointer-events:all;}
+  .report-box{background:white;border-radius:20px;padding:24px;max-width:340px;width:100%;}
+  .report-box h3{font-weight:800;margin-bottom:14px;color:var(--text-dark);}
+  .report-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:6px;transition:background 0.2s;}
+  .report-opt:hover{background:var(--cream);}
+  .report-opt-icon{font-size:1.3rem;}
+  .report-opt-text{font-size:0.85rem;font-weight:600;color:var(--text-dark);}
+  .report-close-btn{width:100%;margin-top:10px;padding:11px;background:#f4f7f4;border:none;border-radius:10px;font-family:'Mukta',sans-serif;font-weight:700;cursor:pointer;color:var(--text-mid);}
+
+  /* RECORDING INDICATOR */
+  .recording-bar{
+    background:var(--red);color:white;padding:8px 16px;
+    display:none;align-items:center;gap:10px;flex-shrink:0;
+  }
+  .recording-bar.show{display:flex;}
+  .rec-dot{width:10px;height:10px;border-radius:50%;background:white;animation:pulse 0.8s ease infinite;}
+  .rec-text{flex:1;font-size:0.82rem;font-weight:700;}
+  .rec-cancel{background:rgba(255,255,255,0.2);border:none;color:white;padding:4px 12px;border-radius:50px;font-family:'Mukta',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;}
+
+  /* ANIMATIONS */
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .msg-row{animation:fadeUp 0.3s ease both;}
+
+  @media(max-width:480px){
+    .price-bar-vals{gap:8px;}
+    .pval-num{font-size:0.8rem;}
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <button class="back-btn">←</button>
+  <div class="chat-user">
+    <div class="chat-avatar">
+      🛒
+      <div class="online-dot"></div>
+    </div>
+    <div class="chat-user-info">
+      <div class="chat-user-name">Priya Suresh (Buyer)</div>
+      <div class="chat-user-sub">🟢 Online now · Coimbatore · Interested in Tomatoes</div>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button class="top-action-btn" onclick="alert('📞 Calling Priya...')">📞</button>
+    <button class="top-action-btn" onclick="openReport()">⚠️</button>
+  </div>
+</div>
+
+<!-- ORDER BANNER -->
+<div class="order-banner" onclick="alert('📦 Order #FD2841 Details\n\nTomatoes × 3 kg\nPrice: ₹54\nDelivery: Tomorrow 8 AM')">
+  <div class="order-icon">📦</div>
+  <div class="order-info">
+    <h4>Order #FD2841 — Tomatoes × 3 kg</h4>
+    <p>Placed 20 mins ago · Delivery tomorrow 8 AM · ₹54 total</p>
+  </div>
+  <div class="order-status pending">⏳ Pending</div>
+</div>
+
+<!-- PRICE BAR -->
+<div class="price-bar">
+  <div class="price-bar-icon">📊</div>
+  <div class="price-bar-text">Today's price for <strong>Tomatoes</strong>:</div>
+  <div class="price-bar-vals">
+    <div class="pval"><div class="pval-num mandi">₹12</div><div class="pval-label">Mandi</div></div>
+    <div class="pval"><div class="pval-num yours">₹18</div><div class="pval-label">Your Price</div></div>
+    <div class="pval"><div class="pval-num retail">₹40</div><div class="pval-label">Market</div></div>
+  </div>
+</div>
+
+<!-- LANGUAGE BAR -->
+<div class="lang-bar">
+  <span class="lang-bar-label">🌐 My language:</span>
+  <button class="lang-pill active" onclick="setMyLang(this,'Tamil')">தமிழ்</button>
+  <button class="lang-pill" onclick="setMyLang(this,'Telugu')">తెలుగు</button>
+  <button class="lang-pill" onclick="setMyLang(this,'Hindi')">हिंदी</button>
+  <button class="lang-pill" onclick="setMyLang(this,'Kannada')">ಕನ್ನಡ</button>
+  <button class="lang-pill" onclick="setMyLang(this,'Malayalam')">മലയാളം</button>
+  <button class="lang-pill" onclick="setMyLang(this,'English')">English</button>
+</div>
+
+<!-- MESSAGES -->
+<div class="messages" id="messages">
+
+  <div class="date-divider"><span>Today, March 18</span></div>
+
+  <!-- BUYER: Text -->
+  <div class="msg-row buyer">
+    <div class="msg-avatar buyer-av">🛒</div>
+    <div class="bubble-wrap">
+      <div class="bubble">
+        <div class="bubble-text">Hello! I saw your tomatoes listing. Are they available today?</div>
+        <button class="translate-btn" onclick="openTranslate('Hello! I saw your tomatoes listing. Are they available today?','English')">🌐 Translate to Tamil</button>
+        <div class="translated-text" id="trans1">
+          <div class="trans-label">Tamil Translation 🌐</div>
+          வணக்கம்! உங்கள் தக்காளி பட்டியலை பார்த்தேன். இன்று கிடைக்குமா?
+        </div>
+      </div>
+      <div class="bubble-time">9:14 AM <span class="read-tick">✓✓</span></div>
+    </div>
+  </div>
+
+  <!-- FARMER: Text -->
+  <div class="msg-row farmer">
+    <div class="msg-avatar farmer-av">👨‍🌾</div>
+    <div class="bubble-wrap">
+      <div class="bubble">
+        <div class="bubble-text">ஆமா! இன்னைக்கு காலைல பறிச்சோம். மிகவும் fresh ஆ இருக்கு! எவ்ளோ வேணும்?</div>
+        <button class="translate-btn" onclick="openTranslate('ஆமா! இன்னைக்கு காலைல பறிச்சோம். மிகவும் fresh ஆ இருக்கு! எவ்ளோ வேணும்?','Tamil')">🌐 Translate to English</button>
+        <div class="translated-text" id="trans2">
+          <div class="trans-label">English Translation 🌐</div>
+          Yes! We harvested this morning. Very fresh! How much do you need?
+        </div>
+      </div>
+      <div class="bubble-time">9:15 AM</div>
+    </div>
+  </div>
+
+  <!-- BUYER: Voice -->
+  <div class="msg-row buyer">
+    <div class="msg-avatar buyer-av">🛒</div>
+    <div class="bubble-wrap">
+      <div class="voice-bubble buyer">
+        <button class="voice-play" onclick="playVoice(this)">▶</button>
+        <div class="voice-wave">
+          <div class="wave-bar" style="height:8px"></div><div class="wave-bar" style="height:14px"></div><div class="wave-bar" style="height:20px"></div><div class="wave-bar" style="height:12px"></div><div class="wave-bar" style="height:18px"></div><div class="wave-bar" style="height:22px"></div><div class="wave-bar" style="height:10px"></div><div class="wave-bar" style="height:16px"></div><div class="wave-bar" style="height:8px"></div><div class="wave-bar" style="height:20px"></div><div class="wave-bar" style="height:14px"></div><div class="wave-bar" style="height:18px"></div>
+        </div>
+        <span class="voice-dur">0:08</span>
+      </div>
+      <button class="voice-trans-btn buyer" onclick="openTranslate('Voice message: I want 5 kg of tomatoes. Can you deliver by 8 AM tomorrow?','Voice - English')">
+        🌐 Translate voice → Tamil
+      </button>
+      <div class="bubble-time" style="justify-content:flex-end">9:16 AM <span class="read-tick">✓✓</span></div>
+    </div>
+  </div>
+
+  <!-- FARMER: Photo -->
+  <div class="msg-row farmer">
+    <div class="msg-avatar farmer-av">👨‍🌾</div>
+    <div class="bubble-wrap">
+      <div class="photo-bubble farmer" onclick="alert('🖼️ Full photo view')">
+        <div class="photo-bubble-img" style="background:linear-gradient(135deg,#e8f5ed,#fff8e8)">🍅</div>
+        <div class="photo-bubble-caption">Today's fresh harvest — just picked! 🌅</div>
+      </div>
+      <button class="translate-btn" onclick="openTranslate('Today\'s fresh harvest — just picked!','Tamil')">🌐 Translate to English</button>
+      <div class="bubble-time">9:17 AM</div>
+    </div>
+  </div>
+
+  <!-- PRICE NEGOTIATION -->
+  <div class="msg-row buyer">
+    <div class="msg-avatar buyer-av">🛒</div>
+    <div class="bubble-wrap">
+      <div class="nego-bubble">
+        <div class="nego-title">💰 Price Negotiation Request</div>
+        <div class="nego-row"><span class="nego-label">Market Price</span><span class="nego-val market">₹40/kg</span></div>
+        <div class="nego-row"><span class="nego-label">Your Listed Price</span><span class="nego-val farmer">₹18/kg</span></div>
+        <div class="nego-row"><span class="nego-label">Buyer's Offer</span><span class="nego-val offer">₹15/kg for 10 kg</span></div>
+        <div class="nego-btns">
+          <button class="nego-btn accept" onclick="acceptNego()">✅ Accept</button>
+          <button class="nego-btn counter" onclick="counterNego()">↩️ Counter</button>
+        </div>
+      </div>
+      <div class="bubble-time" style="justify-content:flex-end">9:18 AM <span class="read-tick">✓✓</span></div>
+    </div>
+  </div>
+
+  <!-- ORDER STATUS -->
+  <div class="status-msg">
+    <div class="sm-icon">📦</div>
+    <h4>Order Confirmed!</h4>
+    <p>Tomatoes × 5 kg · ₹90 · Tomorrow 8 AM</p>
+    <div class="sm-steps">
+      <span class="sm-step done">✅ Confirmed</span>
+      <span class="sm-step active">📦 Packing</span>
+      <span class="sm-step pending">🚚 Delivery</span>
+      <span class="sm-step pending">✓ Received</span>
+    </div>
+  </div>
+
+  <!-- FARMER: Voice -->
+  <div class="msg-row farmer">
+    <div class="msg-avatar farmer-av">👨‍🌾</div>
+    <div class="bubble-wrap">
+      <div class="voice-bubble farmer">
+        <button class="voice-play" onclick="playVoice(this)">▶</button>
+        <div class="voice-wave">
+          <div class="wave-bar" style="height:10px;background:var(--green-mid)"></div><div class="wave-bar" style="height:18px;background:var(--green-mid)"></div><div class="wave-bar" style="height:24px;background:var(--green-mid)"></div><div class="wave-bar" style="height:14px;background:var(--green-mid)"></div><div class="wave-bar" style="height:20px;background:var(--green-mid)"></div><div class="wave-bar" style="height:16px;background:var(--green-mid)"></div><div class="wave-bar" style="height:22px;background:var(--green-mid)"></div><div class="wave-bar" style="height:10px;background:var(--green-mid)"></div><div class="wave-bar" style="height:18px;background:var(--green-mid)"></div><div class="wave-bar" style="height:14px;background:var(--green-mid)"></div>
+        </div>
+        <span class="voice-dur">0:12</span>
+      </div>
+      <button class="voice-trans-btn farmer" onclick="openTranslate('நாளைக்கு காலைல 7:30 மணிக்கு ஒரு பை ready வச்சிருவேன். நீங்க வந்து வாங்கிட்டு போகலாம்!','Voice - Tamil')">
+        🌐 Translate voice → English
+      </button>
+      <div class="bubble-time">9:20 AM</div>
+    </div>
+  </div>
+
+  <!-- BUYER: Text -->
+  <div class="msg-row buyer">
+    <div class="msg-avatar buyer-av">🛒</div>
+    <div class="bubble-wrap">
+      <div class="bubble">
+        <div class="bubble-text">Thank you! See you tomorrow morning 🙏</div>
+        <button class="translate-btn" onclick="openTranslate('Thank you! See you tomorrow morning 🙏','English')">🌐 Translate to Tamil</button>
+      </div>
+      <div class="bubble-time">9:21 AM <span class="read-tick">✓✓</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- QUICK REPLIES -->
+<div class="quick-replies">
+  <button class="qr-chip" onclick="sendQuick('✅ Yes, available!')">✅ Yes, available!</button>
+  <button class="qr-chip" onclick="sendQuick('❌ Sorry, sold out')">❌ Sold out</button>
+  <button class="qr-chip" onclick="sendQuick('📦 Will deliver tomorrow 8 AM')">📦 Deliver 8 AM</button>
+  <button class="qr-chip" onclick="sendQuick('💰 Price is fixed at ₹18/kg')">💰 Price fixed</button>
+  <button class="qr-chip" onclick="sendQuick('📸 Sending fresh photo now...')">📸 Send photo</button>
+  <button class="qr-chip" onclick="sendQuick('🙏 Thank you! Order confirmed')">🙏 Confirmed</button>
+  <button class="qr-chip" onclick="sendQuick('📞 Please call me to discuss')">📞 Call me</button>
+</div>
+
+<!-- RECORDING BAR -->
+<div class="recording-bar" id="recordingBar">
+  <div class="rec-dot"></div>
+  <span class="rec-text">Recording voice message... 0:03</span>
+  <button class="rec-cancel" onclick="stopRecording()">✕ Cancel</button>
+</div>
+
+<!-- INPUT BAR -->
+<div class="input-bar">
+  <div class="input-row">
+    <div class="input-actions">
+      <button class="input-action" onclick="triggerPhoto()" title="Send photo">📷</button>
+      <button class="input-action" id="voiceBtn" onclick="toggleRecording()" title="Voice message">🎙️</button>
+    </div>
+    <div class="msg-input-wrap">
+      <textarea class="msg-input" id="msgInput" placeholder="Type your message..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
+        oninput="autoResize(this)"></textarea>
+    </div>
+    <button class="send-btn" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<!-- TRANSLATE MODAL -->
+<div class="trans-modal-overlay" id="transModal" onclick="closeTransOnBg(event)">
+  <div class="trans-modal">
+    <div class="tm-handle"></div>
+    <div class="tm-head">
+      <h3>🌐 Translate Message</h3>
+      <button class="tm-close" onclick="closeTransModal()">✕</button>
+    </div>
+    <div class="tm-body">
+      <div class="tm-original">
+        <div class="tm-original-label">Original Message</div>
+        <div class="tm-original-text" id="tmOrigText">—</div>
+      </div>
+      <div style="font-size:0.8rem;font-weight:700;color:var(--text-light);margin-bottom:8px;">Translate to:</div>
+      <div class="tm-langs">
+        <button class="tm-lang" onclick="translateTo(this,'Tamil')">தமிழ் Tamil</button>
+        <button class="tm-lang" onclick="translateTo(this,'Telugu')">తెలుగు Telugu</button>
+        <button class="tm-lang" onclick="translateTo(this,'Hindi')">हिंदी Hindi</button>
+        <button class="tm-lang" onclick="translateTo(this,'Kannada')">ಕನ್ನಡ Kannada</button>
+        <button class="tm-lang" onclick="translateTo(this,'Malayalam')">മലയാളം Malayalam</button>
+        <button class="tm-lang" onclick="translateTo(this,'English')">🇬🇧 English</button>
+      </div>
+      <div class="tm-result" id="tmResult">
+        <div class="tm-result-label" id="tmResultLabel">Translation</div>
+        <div class="tm-result-text" id="tmResultText">—</div>
+      </div>
+      <button class="tm-voice-btn" id="tmVoiceBtn" style="display:none" onclick="alert('🔊 Playing translation aloud in selected language!\n\n(Text-to-speech will read the translation out loud so farmers can hear it!)')">
+        🔊 Listen to Translation Aloud
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- REPORT MODAL -->
+<div class="report-modal" id="reportModal" onclick="closeReportOnBg(event)">
+  <div class="report-box">
+    <h3>⚠️ Report a Problem</h3>
+    <div class="report-opt" onclick="reportIssue('Quality not as shown in photos')"><div class="report-opt-icon">📸</div><div class="report-opt-text">Quality not as shown in photos</div></div>
+    <div class="report-opt" onclick="reportIssue('Farmer not responding')"><div class="report-opt-icon">💬</div><div class="report-opt-text">Farmer not responding</div></div>
+    <div class="report-opt" onclick="reportIssue('Wrong price charged')"><div class="report-opt-icon">💰</div><div class="report-opt-text">Wrong price charged</div></div>
+    <div class="report-opt" onclick="reportIssue('Delivery not received')"><div class="report-opt-icon">🚚</div><div class="report-opt-text">Delivery not received</div></div>
+    <div class="report-opt" onclick="reportIssue('Rude or inappropriate behaviour')"><div class="report-opt-icon">🚫</div><div class="report-opt-text">Rude or inappropriate behaviour</div></div>
+    <div class="report-opt" onclick="reportIssue('Other issue')"><div class="report-opt-icon">📋</div><div class="report-opt-text">Other issue</div></div>
+    <button class="report-close-btn" onclick="closeReport()">Cancel</button>
+  </div>
+</div>
+
+<script>
+  let myLang = 'Tamil';
+  let isRecording = false;
+
+  const translations = {
+    Tamil: {
+      'Hello! I saw your tomatoes listing. Are they available today?': 'வணக்கம்! உங்கள் தக்காளி பட்டியலை பார்த்தேன். இன்று கிடைக்குமா?',
+      'Thank you! See you tomorrow morning 🙏': 'நன்றி! நாளை காலையில் சந்திப்போம் 🙏',
+      "Today's fresh harvest — just picked!": 'இன்றைய புதிய அறுவடை — இப்போதுதான் பறித்தேன்!',
+      'I want 5 kg of tomatoes. Can you deliver by 8 AM tomorrow?': 'எனக்கு 5 கிலோ தக்காளி வேணும். நாளைக்கு காலை 8 மணிக்கு deliver பண்ண முடியுமா?',
+      'default': 'மொழிபெயர்ப்பு கிடைக்கிறது. இந்த வார்த்தைகளை தமிழில் படிக்கலாம்!'
+    },
+    Hindi: {
+      'Hello! I saw your tomatoes listing. Are they available today?': 'नमस्ते! मैंने आपकी टमाटर की लिस्टिंग देखी। क्या ये आज उपलब्ध हैं?',
+      'Thank you! See you tomorrow morning 🙏': 'धन्यवाद! कल सुबह मिलते हैं 🙏',
+      'default': 'अनुवाद उपलब्ध है। इन शब्दों को हिंदी में पढ़ सकते हैं!'
+    },
+    Telugu: {
+      'Hello! I saw your tomatoes listing. Are they available today?': 'నమస్కారం! మీ టమాటో లిస్టింగ్ చూశాను. ఈరోజు అందుబాటులో ఉన్నాయా?',
+      'default': 'అనువాదం అందుబాటులో ఉంది. ఈ పదాలను తెలుగులో చదవండి!'
+    },
+    Kannada: {
+      'default': 'ಅನುವಾದ ಲಭ್ಯವಿದೆ. ಈ ಪದಗಳನ್ನು ಕನ್ನಡದಲ್ಲಿ ಓದಬಹುದು!'
+    },
+    Malayalam: {
+      'default': 'വിവർത്തനം ലഭ്യമാണ്. ഈ വാക്കുകൾ മലയാളത്തിൽ വായിക്കാം!'
+    },
+    English: {
+      'ஆமா! இன்னைக்கு காலைல பறிச்சோம். மிகவும் fresh ஆ இருக்கு! எவ்ளோ வேணும்?': 'Yes! We harvested this morning. Very fresh! How much do you need?',
+      'நாளைக்கு காலைல 7:30 மணிக்கு ஒரு பை ready வச்சிருவேன். நீங்க வந்து வாங்கிட்டு போகலாம்!': 'Tomorrow morning at 7:30 AM I will have a bag ready. You can come and pick it up!',
+      'default': 'Translation available in English. The message has been translated successfully!'
+    }
+  };
+
+  let currentTransText = '';
+
+  function openTranslate(text, fromLang) {
+    currentTransText = text;
+    document.getElementById('tmOrigText').textContent = text + (fromLang.includes('Voice') ? ' 🎙️ (voice message)' : '');
+    document.querySelectorAll('.tm-lang').forEach(b => b.classList.remove('active'));
+    document.getElementById('tmResult').classList.remove('show');
+    document.getElementById('tmVoiceBtn').style.display = 'none';
+    document.getElementById('transModal').classList.add('show');
+  }
+
+  function translateTo(btn, lang) {
+    document.querySelectorAll('.tm-lang').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const map = translations[lang] || {};
+    const result = map[currentTransText] || map['default'] || 'Translation coming soon!';
+    document.getElementById('tmResultLabel').textContent = lang + ' Translation 🌐';
+    document.getElementById('tmResultText').textContent = result;
+    document.getElementById('tmResult').classList.add('show');
+    document.getElementById('tmVoiceBtn').style.display = 'flex';
+  }
+
+  function closeTransModal() { document.getElementById('transModal').classList.remove('show'); }
+  function closeTransOnBg(e) { if(e.target===document.getElementById('transModal')) closeTransModal(); }
+
+  function setMyLang(btn, lang) {
+    myLang = lang;
+    document.querySelectorAll('.lang-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.translate-btn').forEach(b => {
+      if(b.textContent.includes('Translate to')) b.textContent = '🌐 Translate to ' + lang;
+    });
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if(!text) return;
+    const msgs = document.getElementById('messages');
+    const row = document.createElement('div');
+    row.className = 'msg-row farmer';
+    row.style.animationDelay = '0s';
+    const now = new Date();
+    const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+    row.innerHTML = `
+      <div class="msg-avatar farmer-av">👨‍🌾</div>
+      <div class="bubble-wrap">
+        <div class="bubble"><div class="bubble-text">${text}</div>
+          <button class="translate-btn" onclick="openTranslate('${text.replace(/'/g,"\\'")}','${myLang}')">🌐 Translate to English</button>
+        </div>
+        <div class="bubble-time">${time} AM</div>
+      </div>`;
+    msgs.appendChild(row);
+    input.value = '';
+    input.style.height = 'auto';
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function sendQuick(text) {
+    document.getElementById('msgInput').value = text;
+    sendMessage();
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  }
+
+  function triggerPhoto() {
+    const msgs = document.getElementById('messages');
+    const row = document.createElement('div');
+    row.className = 'msg-row farmer';
+    row.innerHTML = `
+      <div class="msg-avatar farmer-av">👨‍🌾</div>
+      <div class="bubble-wrap">
+        <div class="photo-bubble farmer">
+          <div class="photo-bubble-img" style="background:linear-gradient(135deg,#e8f5ed,#d4ead4)">🍅</div>
+          <div class="photo-bubble-caption">Fresh batch ready! 🌾</div>
+        </div>
+        <div class="bubble-time">${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2,'0')} AM</div>
+      </div>`;
+    msgs.appendChild(row);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  let recTimer;
+  let recSecs = 0;
+  function toggleRecording() {
+    if(!isRecording) {
+      isRecording = true;
+      document.getElementById('recordingBar').classList.add('show');
+      document.getElementById('voiceBtn').classList.add('recording');
+      recSecs = 0;
+      recTimer = setInterval(() => {
+        recSecs++;
+        document.querySelector('.rec-text').textContent = `Recording voice message... 0:${String(recSecs).padStart(2,'0')}`;
+        if(recSecs >= 30) stopRecording(true);
+      }, 1000);
+    } else {
+      stopRecording(true);
+    }
+  }
+
+  function stopRecording(send=false) {
+    isRecording = false;
+    clearInterval(recTimer);
+    document.getElementById('recordingBar').classList.remove('show');
+    document.getElementById('voiceBtn').classList.remove('recording');
+    if(send && recSecs > 0) {
+      const msgs = document.getElementById('messages');
+      const row = document.createElement('div');
+      row.className = 'msg-row farmer';
+      const dur = '0:' + String(recSecs).padStart(2,'0');
+      row.innerHTML = `
+        <div class="msg-avatar farmer-av">👨‍🌾</div>
+        <div class="bubble-wrap">
+          <div class="voice-bubble farmer">
+            <button class="voice-play" onclick="playVoice(this)">▶</button>
+            <div class="voice-wave">
+              ${[8,14,20,12,18,22,10,16,8,20,14,18].map(h=>`<div class="wave-bar" style="height:${h}px;background:var(--green-mid)"></div>`).join('')}
+            </div>
+            <span class="voice-dur">${dur}</span>
+          </div>
+          <button class="voice-trans-btn farmer" onclick="openTranslate('Voice message recorded in ${myLang}','Voice - ${myLang}')">🌐 Translate voice → English</button>
+          <div class="bubble-time">${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2,'0')} AM</div>
+        </div>`;
+      msgs.appendChild(row);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+  }
+
+  function playVoice(btn) {
+    btn.textContent = '⏸';
+    setTimeout(() => btn.textContent = '▶', 2000);
+  }
+
+  function acceptNego() {
+    alert('✅ Price Accepted!\n\n₹15/kg for 10 kg = ₹150 total\n\nOrder will be confirmed!');
+  }
+  function counterNego() {
+    alert('↩️ Counter Offer:\n\nYou can suggest ₹17/kg for 10 kg\n\nThis feature will show a counter input!');
+  }
+
+  function openReport() { document.getElementById('reportModal').classList.add('show'); }
+  function closeReport() { document.getElementById('reportModal').classList.remove('show'); }
+  function closeReportOnBg(e) { if(e.target===document.getElementById('reportModal')) closeReport(); }
+  function reportIssue(issue) {
+    alert('⚠️ Report submitted!\n\n"' + issue + '"\n\nFarmDirect support will review this within 2 hours and help resolve it. 🙏');
+    closeReport();
+  }
+
+  // Scroll to bottom on load
+  window.onload = () => {
+    const msgs = document.getElementById('messages');
+    msgs.scrollTop = msgs.scrollHeight;
+  };
+</script>
+</body>
+</html>
