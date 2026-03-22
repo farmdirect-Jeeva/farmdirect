@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FarmDirect — From Farm to Your Table</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Mukta', sans-serif;
+    background: #0d1f0d;
+    min-height: 100vh;
+    color: white;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #1a4a2e, #0d2e1a);
+    padding: 40px 24px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '🌾';
+    position: absolute;
+    font-size: 200px;
+    opacity: 0.05;
+    top: -40px;
+    right: -40px;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 8px;
+  }
+  .logo span { color: #f5c842; }
+  .tagline {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+  }
+  .header-badges {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #f5c842;
+  }
+
+  /* MAIN CONTENT */
+  .main { padding: 24px 16px 80px; max-width: 480px; margin: 0 auto; }
+
+  /* WELCOME CARD */
+  .welcome-card {
+    background: linear-gradient(135deg, #f5c842, #e8854a);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .welcome-icon { font-size: 2.5rem; flex-shrink: 0; }
+  .welcome-text h3 { font-weight: 800; font-size: 1rem; color: #1a2e1a; }
+  .welcome-text p { font-size: 0.82rem; color: rgba(26,46,26,0.7); margin-top: 3px; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+    margin-top: 24px;
+  }
+
+  /* SCREEN CARDS */
+  .screen-card {
+    background: #1a2e1a;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .screen-card:hover, .screen-card:active {
+    background: #243d24;
+    border-color: rgba(76,175,114,0.3);
+    transform: translateX(4px);
+  }
+  .screen-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+  .screen-info { flex: 1; }
+  .screen-name {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: white;
+    margin-bottom: 3px;
+  }
+  .screen-desc {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.5);
+  }
+  .screen-arrow {
+    color: rgba(255,255,255,0.3);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .screen-card.active .screen-arrow { color: #4caf72; }
+  .screen-card.active { border-color: rgba(76,175,114,0.4); }
+
+  /* STATUS BADGE */
+  .status {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 50px;
+    margin-left: 6px;
+  }
+  .status.live { background: #4caf72; color: white; }
+  .status.soon { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: #1a2e1a;
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .stat-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #f5c842;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.4);
+    margin-top: 3px;
+    font-weight: 600;
+  }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #1a2e1a;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    padding: 12px 0 20px;
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .nav-icon { font-size: 1.3rem; }
+  .nav-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.4);
+  }
+  .nav-item.active .nav-label { color: #4caf72; }
+
+  /* MISSION CARD */
+  .mission-card {
+    background: linear-gradient(135deg, #1a4a2e, #0d3320);
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 16px;
+    border: 1px solid rgba(76,175,114,0.2);
+    text-align: center;
+  }
+  .mission-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: white;
+    margin-bottom: 8px;
+  }
+  .mission-card p {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.6;
+  }
+  .mission-card .highlight {
+    color: #f5c842;
+    font-weight: 700;
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(20px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  .screen-card { animation: fadeUp 0.4s ease both; }
+  .screen-card:nth-child(1) { animation-delay: 0.05s; }
+  .screen-card:nth-child(2) { animation-delay: 0.1s; }
+  .screen-card:nth-child(3) { animation-delay: 0.15s; }
+  .screen-card:nth-child(4) { animation-delay: 0.2s; }
+  .screen-card:nth-child(5) { animation-delay: 0.25s; }
+  .screen-card:nth-child(6) { animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">🌾 Farm<span>Direct</span></div>
+  <div class="tagline">From Farm to Your Table — No Middlemen</div>
+  <div class="header-badges">
+    <div class="badge">🇮🇳 Made for India</div>
+    <div class="badge">₹0 Commission</div>
+    <div class="badge">🌿 Startup India Approved</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- WELCOME -->
+  <div class="welcome-card">
+    <div class="welcome-icon">👨‍🌾</div>
+    <div class="welcome-text">
+      <h3>Welcome to FarmDirect!</h3>
+      <p>Connect directly with farmers near you. Fresh produce, honest prices, zero commission.</p>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-val">6</div>
+      <div class="stat-label">Screens Built</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">₹0</div>
+      <div class="stat-label">Commission</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">5+</div>
+      <div class="stat-label">Languages</div>
+    </div>
+  </div>
+
+  <!-- SCREENS -->
+  <div class="section-title">App Screens</div>
+
+  <a class="screen-card active" href="farmdirect.html">
+    <div class="screen-icon" style="background:linear-gradient(135deg,#1a4a2e,#2d7a4f)">🌾</div>
+    <div class="screen-info">
+      <div class="screen-name">Landing Page <span class="status live">LIVE</span></div>
+      <div class="screen-desc">Home page — FarmDirect introduction</div>
+    </div>
+    <div class="screen-arrow">›</div>
+  </a>
+
+  <a class="screen-card active" href="farmdirect-signup.html">
+    <div class="screen-icon" style="background:linear-gradient(135deg,#2d7a4f,#4caf72)">👨‍🌾</div>
+    <div class="screen-info">
+      <div class="screen-name">Farmer Sign Up <span class="status live">LIVE</span></div>
+      <div class="screen-desc">Register as farmer with verification</div>
+    </div>
+    <div class="screen-arrow">›</div>
+  </a>
+
+  <a class="screen-card active" href="farmdirect-listing.html">
+    <div class="screen-icon" style="background:linear-gradient(135deg,#f5c842,#e8854a)">📋</div>
+    <div class="screen-info">
+      <div class="screen-name">Product Listing <span class="status live">LIVE</span></div>
+      <div class="screen-desc">Farmers list their fresh produce</div>
+    </div>
+    <div class="screen-arrow">›</div>
+  </a>
+
+  <a class="screen-card active" href="farmdirect-browse.html">
+    <div class="screen-icon" style="background:linear-gradient(135deg,#0077b6,#0096c7)">🛒</div>
+    <div class="screen-info">
+      <div class="screen-name">Buyer Browse <span class="status live">LIVE</span></div>
+      <div class="screen-desc">Shop fresh produce from nearby farms</div>
+    </div>
+    <div class="screen-arrow">›</div>
+  </a>
+
+  <a class="screen-card active" href="farmdirect-chat.html">
+    <div class="screen-icon" style="background:linear-gradient(135deg,#e63946,#ff6b35)">💬</div>
+    <div class="screen-info">
+      <div class="screen-name">Chat & Translate <span class="status live">LIVE</span></div>
+      <div class="screen-desc">Direct chat with language translation</div>
+    </div>
+    <div class="screen-arrow">›</div>
+  </a>
+
+  <a class="screen-card active" href="farmdirect-delivery.html">
+    <div class="screen-icon" style="background:linear-gradient(135deg,#7b2d8b,#c77dff)">🚚</div>
+    <div class="screen-info">
+      <div class="screen-name">Delivery Tracking <span class="status live">LIVE</span></div>
+      <div class="screen-desc">Live map tracking & notifications</div>
+    </div>
+    <div class="screen-arrow">›</div>
+  </a>
+
+  <!-- MISSION -->
+  <div class="mission-card">
+    <h3>🌾 Our Mission</h3>
+    <p>
+      <span class="highlight">140 million Indian farmers</span> lose 40–60% of their income to middlemen every day.
+      FarmDirect exists to change that — one direct sale at a time.
+      <br/><br/>
+      Built with ❤️ by <span class="highlight">Jeeva V</span> — for every farmer, especially <span class="highlight">his mother</span>. 🌾
+    </p>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <a class="nav-item active" href="index.html">
+    <div class="nav-icon">🏠</div>
+    <div class="nav-label" style="color:#4caf72">Home</div>
+  </a>
+  <a class="nav-item" href="farmdirect-browse.html">
+    <div class="nav-icon">🛒</div>
+    <div class="nav-label">Shop</div>
+  </a>
+  <a class="nav-item" href="farmdirect-signup.html">
+    <div class="nav-icon">👨‍🌾</div>
+    <div class="nav-label">Farmer</div>
+  </a>
+  <a class="nav-item" href="farmdirect-chat.html">
+    <div class="nav-icon">💬</div>
+    <div class="nav-label">Chat</div>
+  </a>
+  <a class="nav-item" href="farmdirect-delivery.html">
+    <div class="nav-icon">🚚</div>
+    <div class="nav-label">Track</div>
+  </a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FarmDirect — List Your Produce</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --green-dark: #1a4a2e;
+    --green-mid: #2d7a4f;
+    --green-light: #4caf72;
+    --green-pale: #e8f5ed;
+    --yellow: #f5c842;
+    --orange: #e8854a;
+    --brown: #7a4f2d;
+    --cream: #fdf6e3;
+    --white: #ffffff;
+    --text-dark: #1a2e1a;
+    --text-mid: #3d5a3d;
+    --text-light: #7a9a7a;
+    --border: #d4e8d4;
+    --error: #e84a4a;
+    --organic: #2d7a4f;
+    --chemical: #e8854a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Mukta', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+  }
+
+  /* TOP NAV */
+  .topnav {
+    background: var(--green-dark);
+    padding: 16px 24px;
+    display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+  }
+  .back-btn {
+    background: rgba(255,255,255,0.12); border: none;
+    color: white; width: 36px; height: 36px; border-radius: 10px;
+    font-size: 1rem; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.2); }
+  .nav-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; font-weight: 900; color: white; flex: 1;
+  }
+  .nav-title span { color: var(--yellow); font-size: 0.85rem; font-family: 'Mukta', sans-serif; font-weight: 600; display: block; }
+  .nav-save {
+    background: var(--yellow); color: var(--brown);
+    border: none; padding: 8px 18px; border-radius: 10px;
+    font-family: 'Mukta', sans-serif; font-weight: 700;
+    font-size: 0.88rem; cursor: pointer; transition: all 0.2s;
+  }
+  .nav-save:hover { background: #e6ba30; }
+
+  /* LAYOUT */
+  .page {
+    max-width: 640px; margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+
+  /* SECTION BLOCKS */
+  .block {
+    background: white; border-radius: 20px;
+    padding: 22px; margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(26,74,46,0.07);
+    animation: fadeUp 0.4s ease both;
+  }
+  .block:nth-child(1) { animation-delay: 0.05s; }
+  .block:nth-child(2) { animation-delay: 0.1s; }
+  .block:nth-child(3) { animation-delay: 0.15s; }
+  .block:nth-child(4) { animation-delay: 0.2s; }
+  .block:nth-child(5) { animation-delay: 0.25s; }
+  .block:nth-child(6) { animation-delay: 0.3s; }
+
+  .block-title {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 18px;
+  }
+  .block-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+  }
+  .block-icon.green { background: var(--green-pale); }
+  .block-icon.yellow { background: #fff8e8; }
+  .block-icon.orange { background: #fef0e8; }
+  .block-icon.blue { background: #eef4ff; }
+  .block-icon.brown { background: #fdf6e3; }
+  .block-title h3 { font-weight: 800; font-size: 1rem; color: var(--text-dark); }
+  .block-title p { font-size: 0.78rem; color: var(--text-light); }
+
+  /* FORM FIELDS */
+  .form-group { margin-bottom: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  label {
+    display: block; font-weight: 700; font-size: 0.85rem;
+    color: var(--text-dark); margin-bottom: 6px;
+  }
+  .req { color: var(--error); }
+  .badge-label {
+    display: inline-block; font-size: 0.68rem; font-weight: 700;
+    padding: 2px 7px; border-radius: 50px; margin-left: 6px;
+    vertical-align: middle;
+  }
+  .badge-trust { background: rgba(45,122,79,0.12); color: var(--green-mid); }
+  .badge-new { background: rgba(232,133,74,0.15); color: var(--orange); }
+
+  input, select, textarea {
+    width: 100%; padding: 11px 14px;
+    border: 2px solid var(--border); border-radius: 12px;
+    font-family: 'Mukta', sans-serif; font-size: 0.95rem;
+    color: var(--text-dark); background: white;
+    transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--green-mid);
+    box-shadow: 0 0 0 3px rgba(45,122,79,0.1);
+  }
+  input::placeholder { color: var(--text-light); }
+  textarea { resize: none; height: 80px; line-height: 1.5; }
+
+  /* PHOTO UPLOAD GRID */
+  .photo-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  }
+  .photo-slot {
+    aspect-ratio: 1; border-radius: 12px;
+    border: 2px dashed var(--border);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s;
+    background: var(--cream); font-size: 0.65rem;
+    color: var(--text-light); font-weight: 600; gap: 4px;
+  }
+  .photo-slot:hover { border-color: var(--green-mid); background: var(--green-pale); }
+  .photo-slot .slot-icon { font-size: 1.4rem; }
+  .photo-slot.main {
+    grid-column: span 2; grid-row: span 2;
+    font-size: 0.75rem;
+  }
+  .photo-slot.main .slot-icon { font-size: 2rem; }
+  .photo-tip {
+    font-size: 0.78rem; color: var(--text-light);
+    margin-top: 10px; display: flex; align-items: flex-start; gap: 6px;
+  }
+
+  /* CROP SELECTOR */
+  .crop-search { position: relative; margin-bottom: 12px; }
+  .crop-search input { padding-left: 36px; }
+  .crop-search::before {
+    content: '🔍'; position: absolute;
+    left: 12px; top: 50%; transform: translateY(-50%);
+    font-size: 0.9rem;
+  }
+  .crop-quick { display: flex; flex-wrap: wrap; gap: 7px; }
+  .crop-chip {
+    padding: 6px 12px; border-radius: 50px;
+    border: 2px solid var(--border); background: white;
+    font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    color: var(--text-mid); transition: all 0.18s;
+    font-family: 'Mukta', sans-serif;
+  }
+  .crop-chip.selected {
+    border-color: var(--green-mid); background: var(--green-pale);
+    color: var(--green-dark);
+  }
+
+  /* UNIT SELECTOR */
+  .unit-tabs {
+    display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;
+  }
+  .unit-tab {
+    padding: 7px 16px; border-radius: 50px;
+    border: 2px solid var(--border); background: white;
+    font-size: 0.82rem; font-weight: 700; cursor: pointer;
+    color: var(--text-mid); transition: all 0.18s;
+    font-family: 'Mukta', sans-serif;
+  }
+  .unit-tab.active {
+    border-color: var(--green-mid); background: var(--green-pale);
+    color: var(--green-dark);
+  }
+
+  /* MARKET PRICE BANNER */
+  .market-banner {
+    background: linear-gradient(135deg, #fff8e8, #fef0e8);
+    border: 2px solid rgba(245,200,66,0.4);
+    border-radius: 14px; padding: 14px 16px;
+    margin-bottom: 16px; display: flex; align-items: center; gap: 14px;
+  }
+  .market-banner-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .market-info { flex: 1; }
+  .market-info h4 { font-weight: 700; font-size: 0.88rem; color: var(--brown); }
+  .market-prices { display: flex; gap: 16px; margin-top: 6px; flex-wrap: wrap; }
+  .market-price-item { text-align: center; }
+  .market-price-item .mp-label { font-size: 0.68rem; color: var(--text-light); font-weight: 600; }
+  .market-price-item .mp-val { font-size: 1rem; font-weight: 800; }
+  .mp-val.mandi { color: var(--orange); }
+  .mp-val.retail { color: var(--error); }
+  .mp-val.yours { color: var(--green-mid); }
+
+  /* PRICE INPUT WITH ₹ */
+  .price-input-wrap { position: relative; }
+  .price-input-wrap input { padding-left: 32px; font-weight: 700; font-size: 1.1rem; }
+  .price-rupee {
+    position: absolute; left: 12px; top: 50%;
+    transform: translateY(-50%); font-weight: 800;
+    color: var(--green-mid); font-size: 1rem;
+  }
+  .price-feedback {
+    margin-top: 8px; padding: 8px 12px; border-radius: 10px;
+    font-size: 0.8rem; font-weight: 600; display: none;
+  }
+  .price-feedback.show { display: flex; align-items: center; gap: 6px; }
+  .price-feedback.good { background: var(--green-pale); color: var(--green-dark); }
+  .price-feedback.great { background: #fff8e8; color: var(--brown); }
+
+  /* BULK DISCOUNT */
+  .bulk-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; background: var(--cream);
+    border-radius: 10px; margin-bottom: 8px;
+  }
+  .bulk-row input { flex: 1; min-width: 0; }
+  .bulk-row span { font-size: 0.82rem; font-weight: 600; color: var(--text-mid); white-space: nowrap; }
+  .add-bulk {
+    background: transparent; border: 2px dashed var(--border);
+    color: var(--green-mid); padding: 9px;
+    border-radius: 10px; width: 100%; cursor: pointer;
+    font-family: 'Mukta', sans-serif; font-weight: 700;
+    font-size: 0.85rem; transition: all 0.2s;
+  }
+  .add-bulk:hover { border-color: var(--green-mid); background: var(--green-pale); }
+
+  /* FARMING METHOD */
+  .method-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .method-card {
+    padding: 14px; border-radius: 14px;
+    border: 2px solid var(--border); cursor: pointer;
+    text-align: center; transition: all 0.2s;
+    background: white;
+  }
+  .method-card:hover { transform: translateY(-2px); }
+  .method-card.organic-card.selected { border-color: var(--green-mid); background: var(--green-pale); }
+  .method-card.chemical-card.selected { border-color: var(--orange); background: #fef0e8; }
+  .method-card .mc-icon { font-size: 2rem; margin-bottom: 8px; }
+  .method-card h4 { font-weight: 800; font-size: 0.88rem; }
+  .method-card p { font-size: 0.72rem; color: var(--text-light); margin-top: 3px; }
+  .organic-card h4 { color: var(--green-dark); }
+  .chemical-card h4 { color: var(--brown); }
+
+  .inputs-used { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+  .input-chip {
+    padding: 6px 12px; border-radius: 50px;
+    border: 2px solid var(--border); background: white;
+    font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    color: var(--text-mid); transition: all 0.18s;
+    font-family: 'Mukta', sans-serif;
+  }
+  .input-chip.selected-organic { border-color: var(--green-mid); background: var(--green-pale); color: var(--green-dark); }
+  .input-chip.selected-chemical { border-color: var(--orange); background: #fef0e8; color: var(--brown); }
+
+  /* DELIVERY */
+  .delivery-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .delivery-opt {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px; border-radius: 14px;
+    border: 2px solid var(--border); cursor: pointer;
+    transition: all 0.2s; background: white;
+  }
+  .delivery-opt.selected { border-color: var(--green-mid); background: var(--green-pale); }
+  .delivery-opt-icon { font-size: 1.6rem; flex-shrink: 0; }
+  .delivery-opt-info { flex: 1; }
+  .delivery-opt-info h4 { font-weight: 700; font-size: 0.9rem; color: var(--text-dark); }
+  .delivery-opt-info p { font-size: 0.75rem; color: var(--text-light); margin-top: 2px; }
+  .delivery-check {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--border); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; transition: all 0.2s;
+  }
+  .delivery-opt.selected .delivery-check {
+    background: var(--green-mid); border-color: var(--green-mid); color: white;
+  }
+
+  /* EXPECTATIONS */
+  .expect-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+  .expect-chip {
+    padding: 7px 13px; border-radius: 50px;
+    border: 2px solid var(--border); background: white;
+    font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    color: var(--text-mid); transition: all 0.18s;
+    font-family: 'Mukta', sans-serif;
+  }
+  .expect-chip.selected { border-color: var(--green-mid); background: var(--green-pale); color: var(--green-dark); }
+
+  /* SUBMIT BTN */
+  .submit-block {
+    background: linear-gradient(135deg, var(--green-dark), #0d3320);
+    border-radius: 20px; padding: 24px;
+    text-align: center; margin-top: 8px;
+  }
+  .submit-block h3 {
+    font-family: 'Playfair Display', serif;
+    color: white; font-size: 1.2rem; margin-bottom: 6px;
+  }
+  .submit-block p { color: rgba(255,255,255,0.6); font-size: 0.82rem; margin-bottom: 18px; }
+  .btn-publish {
+    width: 100%; padding: 15px;
+    background: var(--yellow); color: var(--brown);
+    border: none; border-radius: 14px;
+    font-family: 'Mukta', sans-serif; font-size: 1.05rem; font-weight: 800;
+    cursor: pointer; transition: all 0.25s;
+    box-shadow: 0 4px 16px rgba(245,200,66,0.4);
+  }
+  .btn-publish:hover { background: #e6ba30; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,200,66,0.5); }
+  .btn-draft {
+    width: 100%; padding: 11px;
+    background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 14px;
+    font-family: 'Mukta', sans-serif; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; margin-top: 10px; transition: all 0.2s;
+  }
+  .btn-draft:hover { background: rgba(255,255,255,0.18); color: white; }
+
+  /* SUCCESS POPUP */
+  .popup-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999; padding: 20px; opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .popup-overlay.show { opacity: 1; pointer-events: all; }
+  .popup {
+    background: white; border-radius: 24px; padding: 32px;
+    max-width: 360px; width: 100%; text-align: center;
+    transform: scale(0.8); transition: transform 0.3s;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .popup-overlay.show .popup { transform: scale(1); }
+  .popup-icon { font-size: 3.5rem; margin-bottom: 16px; }
+  .popup h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--green-dark); margin-bottom: 8px; }
+  .popup p { color: var(--text-mid); font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px; }
+  .popup-stats { display: flex; justify-content: center; gap: 24px; margin: 16px 0; }
+  .popup-stat { text-align: center; }
+  .popup-stat-val { font-size: 1.4rem; font-weight: 800; color: var(--green-mid); }
+  .popup-stat-label { font-size: 0.72rem; color: var(--text-light); }
+  .popup-btn {
+    width: 100%; padding: 13px; background: var(--green-mid);
+    color: white; border: none; border-radius: 12px;
+    font-family: 'Mukta', sans-serif; font-weight: 700; font-size: 0.95rem;
+    cursor: pointer; margin-bottom: 8px;
+  }
+  .popup-btn2 {
+    width: 100%; padding: 11px; background: transparent;
+    color: var(--text-mid); border: 2px solid var(--border); border-radius: 12px;
+    font-family: 'Mukta', sans-serif; font-weight: 600; font-size: 0.88rem;
+    cursor: pointer;
+  }
+
+  /* HELPER */
+  .helper { font-size: 0.76rem; color: var(--text-light); margin-top: 5px; }
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+  @media(max-width:480px){
+    .form-row { grid-template-columns: 1fr; }
+    .photo-grid { grid-template-columns: repeat(3,1fr); }
+    .photo-slot.main { grid-column: span 1; grid-row: span 1; }
+    .method-cards { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div class="topnav">
+  <button class="back-btn">←</button>
+  <div class="nav-title">
+    List Your Produce
+    <span>🌾 FarmDirect — Sell Directly to Buyers</span>
+  </div>
+  <button class="nav-save" onclick="saveDraft()">Save Draft</button>
+</div>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- 1. CROP DETAILS -->
+  <div class="block">
+    <div class="block-title">
+      <div class="block-icon green">🌱</div>
+      <div>
+        <h3>What are you selling?</h3>
+        <p>Select your crop and add clear photos</p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Crop Name <span class="req">*</span></label>
+      <div class="crop-search">
+        <input type="text" placeholder="Search or type your crop name..." id="cropInput"/>
+      </div>
+      <div class="crop-quick">
+        <button class="crop-chip" onclick="selectCrop(this,'🍅 Tomatoes')">🍅 Tomatoes</button>
+        <button class="crop-chip" onclick="selectCrop(this,'🧅 Onions')">🧅 Onions</button>
+        <button class="crop-chip" onclick="selectCrop(this,'🥬 Spinach')">🥬 Spinach</button>
+        <button class="crop-chip" onclick="selectCrop(this,'🌶️ Chilli')">🌶️ Chilli</button>
+        <button class="crop-chip" onclick="selectCrop(this,'🥕 Carrots')">🥕 Carrots</button>
+        <button class="crop-chip" onclick="selectCrop(this,'🍆 Brinjal')">🍆 Brinjal</button>
+        <button class="crop-chip" onclick="selectCrop(this,'🥔 Potatoes')">🥔 Potatoes</button>
+        <button class="crop-chip" onclick="selectCrop(this,'🥭 Mangoes')">🥭 Mangoes</button>
+        <button class="crop-chip" onclick="selectCrop(this,'🌽 Corn')">🌽 Corn</button>
+        <button class="crop-chip" onclick="selectCrop(this,'🍌 Bananas')">🍌 Bananas</button>
+        <button class="crop-chip" onclick="selectCrop(this,'🍚 Rice')">🍚 Rice</button>
+        <button class="crop-chip" onclick="selectCrop(this,'🌾 Wheat')">🌾 Wheat</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Product Photos <span class="req">*</span> <span class="badge-label badge-trust">🛡️ Builds Buyer Trust</span></label>
+      <div class="photo-grid">
+        <div class="photo-slot main" onclick="triggerPhoto('main')">
+          <div class="slot-icon">📸</div>
+          <div>Main Photo</div>
+          <div style="font-size:0.6rem;opacity:0.7">Tap to upload</div>
+        </div>
+        <div class="photo-slot" onclick="triggerPhoto(2)"><div class="slot-icon">+</div><div>Add</div></div>
+        <div class="photo-slot" onclick="triggerPhoto(3)"><div class="slot-icon">+</div><div>Add</div></div>
+        <div class="photo-slot" onclick="triggerPhoto(4)"><div class="slot-icon">+</div><div>Add</div></div>
+        <div class="photo-slot" onclick="triggerPhoto(5)"><div class="slot-icon">+</div><div>Add</div></div>
+      </div>
+      <div class="photo-tip">💡 <span>Clear, bright photos get <strong>3x more buyers.</strong> Show close-up of produce, full batch, and your farm if possible.</span></div>
+    </div>
+
+    <div class="form-group">
+      <label>Short Description</label>
+      <textarea placeholder="e.g. Fresh tomatoes harvested this morning. Grown without pesticides in red soil. Very juicy and firm. Available every week..."></textarea>
+    </div>
+  </div>
+
+  <!-- 2. QUANTITY & HARVEST -->
+  <div class="block">
+    <div class="block-title">
+      <div class="block-icon yellow">📦</div>
+      <div>
+        <h3>Quantity & Availability</h3>
+        <p>How much do you have and when was it harvested?</p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Selling Unit <span class="req">*</span></label>
+      <div class="unit-tabs">
+        <button class="unit-tab active" onclick="setUnit(this,'kg')">Per Kg</button>
+        <button class="unit-tab" onclick="setUnit(this,'bunch')">Per Bunch</button>
+        <button class="unit-tab" onclick="setUnit(this,'piece')">Per Piece</button>
+        <button class="unit-tab" onclick="setUnit(this,'litre')">Per Litre</button>
+        <button class="unit-tab" onclick="setUnit(this,'quintal')">Per Quintal</button>
+        <button class="unit-tab" onclick="setUnit(this,'box')">Per Box</button>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Available Quantity <span class="req">*</span></label>
+        <input type="number" placeholder="e.g. 50" id="qtyInput"/>
+        <p class="helper" id="qtyUnit">Total kg available</p>
+      </div>
+      <div class="form-group">
+        <label>Minimum Order</label>
+        <input type="number" placeholder="e.g. 2"/>
+        <p class="helper">Least a buyer can order</p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Harvest Date <span class="req">*</span></label>
+        <input type="date" id="harvestDate"/>
+        <p class="helper">When was this harvested?</p>
+      </div>
+      <div class="form-group">
+        <label>Available Until</label>
+        <input type="date"/>
+        <p class="helper">Last date to order</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. PRICING -->
+  <div class="block">
+    <div class="block-title">
+      <div class="block-icon orange">💰</div>
+      <div>
+        <h3>Your Price</h3>
+        <p>You set the price — zero commission charged</p>
+      </div>
+    </div>
+
+    <!-- MARKET PRICE BANNER -->
+    <div class="market-banner">
+      <div class="market-banner-icon">📊</div>
+      <div class="market-info">
+        <h4>Today's Market Prices (Tomatoes)</h4>
+        <div class="market-prices">
+          <div class="market-price-item">
+            <div class="mp-label">Mandi Price</div>
+            <div class="mp-val mandi">₹12/kg</div>
+          </div>
+          <div class="market-price-item">
+            <div class="mp-label">Retail Price</div>
+            <div class="mp-val retail">₹40/kg</div>
+          </div>
+          <div class="market-price-item">
+            <div class="mp-label">Your Sweet Spot</div>
+            <div class="mp-val yours">₹18–25</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Your Selling Price <span class="req">*</span></label>
+      <div class="price-input-wrap">
+        <span class="price-rupee">₹</span>
+        <input type="number" placeholder="0" id="priceInput" oninput="checkPrice(this.value)"/>
+      </div>
+      <div class="price-feedback" id="priceFeedback"></div>
+      <p class="helper">Buyer pays exactly this — FarmDirect takes ₹0 commission</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="form-group">
+      <label>Bulk Discounts <span class="badge-label badge-new">✨ Sell More</span></label>
+      <p class="helper" style="margin-bottom:10px">Offer lower price for larger orders to attract bulk buyers</p>
+      <div id="bulkRows">
+        <div class="bulk-row">
+          <span>Buy</span>
+          <input type="number" placeholder="10" style="max-width:70px"/>
+          <span>kg or more →</span>
+          <span>₹</span>
+          <input type="number" placeholder="16"/>
+          <span>/kg</span>
+        </div>
+      </div>
+      <button class="add-bulk" onclick="addBulkRow()">+ Add Another Bulk Tier</button>
+    </div>
+  </div>
+
+  <!-- 4. FARMING METHOD -->
+  <div class="block">
+    <div class="block-title">
+      <div class="block-icon green">🌿</div>
+      <div>
+        <h3>Farming Method</h3>
+        <p>Be honest — buyers appreciate transparency</p>
+      </div>
+    </div>
+
+    <div class="method-cards">
+      <div class="method-card organic-card selected" onclick="selectMethod(this,'organic')">
+        <div class="mc-icon">🌿</div>
+        <h4>Natural / Organic</h4>
+        <p>No synthetic chemicals</p>
+      </div>
+      <div class="method-card chemical-card" onclick="selectMethod(this,'chemical')">
+        <div class="mc-icon">🧪</div>
+        <h4>Conventional</h4>
+        <p>Standard farming methods</p>
+      </div>
+    </div>
+
+    <div id="organicInputs">
+      <label>What natural inputs do you use?</label>
+      <div class="inputs-used">
+        <button class="input-chip" onclick="toggleInput(this,'organic')">🐄 Cow Dung Manure</button>
+        <button class="input-chip" onclick="toggleInput(this,'organic')">🌱 Compost</button>
+        <button class="input-chip" onclick="toggleInput(this,'organic')">🌾 Vermicompost</button>
+        <button class="input-chip" onclick="toggleInput(this,'organic')">🍂 Green Manure</button>
+        <button class="input-chip" onclick="toggleInput(this,'organic')">💧 Neem Oil</button>
+        <button class="input-chip" onclick="toggleInput(this,'organic')">🌻 No Pesticides</button>
+        <button class="input-chip" onclick="toggleInput(this,'organic')">💦 Drip Irrigation</button>
+        <button class="input-chip" onclick="toggleInput(this,'organic')">☀️ Solar Powered</button>
+      </div>
+    </div>
+
+    <div id="chemicalInputs" style="display:none">
+      <label>What products do you use?</label>
+      <div class="inputs-used">
+        <button class="input-chip" onclick="toggleInput(this,'chemical')">🧴 Standard Fertilizer</button>
+        <button class="input-chip" onclick="toggleInput(this,'chemical')">🐛 Pesticides</button>
+        <button class="input-chip" onclick="toggleInput(this,'chemical')">🌊 Herbicides</button>
+        <button class="input-chip" onclick="toggleInput(this,'chemical')">💊 Growth Promoters</button>
+      </div>
+      <div style="margin-top:12px;background:#fef0e8;border-radius:10px;padding:12px;font-size:0.78rem;color:var(--brown)">
+        ℹ️ <strong>That's okay!</strong> Most farming uses standard methods. Being honest builds buyer trust. Buyers appreciate knowing exactly what they're buying.
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top:16px">
+      <label>Additional Notes on Farming</label>
+      <textarea placeholder="e.g. We follow traditional farming passed down for 3 generations. Our land has not used chemicals for 5 years. We use only well water for irrigation..."></textarea>
+    </div>
+  </div>
+
+  <!-- 5. DELIVERY -->
+  <div class="block">
+    <div class="block-title">
+      <div class="block-icon blue">🚚</div>
+      <div>
+        <h3>Delivery & Timing</h3>
+        <p>How and when can buyers receive their order?</p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Delivery Options <span class="req">*</span></label>
+      <div class="delivery-options">
+        <div class="delivery-opt selected" onclick="toggleDelivery(this)">
+          <div class="delivery-opt-icon">🚚</div>
+          <div class="delivery-opt-info">
+            <h4>I Will Deliver</h4>
+            <p>You deliver to buyer's location directly</p>
+          </div>
+          <div class="delivery-check">✓</div>
+        </div>
+        <div class="delivery-opt" onclick="toggleDelivery(this)">
+          <div class="delivery-opt-icon">🏪</div>
+          <div class="delivery-opt-info">
+            <h4>Buyer Picks Up</h4>
+            <p>Buyer comes to your farm or a fixed point</p>
+          </div>
+          <div class="delivery-check"></div>
+        </div>
+        <div class="delivery-opt" onclick="toggleDelivery(this)">
+          <div class="delivery-opt-icon">🤝</div>
+          <div class="delivery-opt-info">
+            <h4>Both Options</h4>
+            <p>Let buyer choose what works for them</p>
+          </div>
+          <div class="delivery-check"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Delivery Time</label>
+        <select>
+          <option>Same day (morning harvest)</option>
+          <option>Within 24 hours</option>
+          <option>Within 2 days</option>
+          <option>3–5 days</option>
+          <option>On specific dates only</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Delivery Radius</label>
+        <select>
+          <option>Within 10 km</option>
+          <option>Within 25 km</option>
+          <option>Within 50 km</option>
+          <option>Within 100 km</option>
+          <option>Anywhere in State</option>
+          <option>Pan India</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Serviceable Pincodes</label>
+      <input type="text" placeholder="e.g. 641001, 641002, 641003 (separate with commas)"/>
+      <p class="helper">Only buyers in these pincodes will see your listing</p>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Delivery Start Time</label>
+        <input type="time" value="07:00"/>
+      </div>
+      <div class="form-group">
+        <label>Delivery End Time</label>
+        <input type="time" value="19:00"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. SELLER EXPECTATIONS -->
+  <div class="block">
+    <div class="block-title">
+      <div class="block-icon brown">🤝</div>
+      <div>
+        <h3>What You Expect from Buyers</h3>
+        <p>Set clear expectations for a smooth deal</p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Payment Preference <span class="req">*</span></label>
+      <div class="expect-chips">
+        <button class="expect-chip" onclick="toggleExpect(this)">💵 Cash on Delivery</button>
+        <button class="expect-chip selected" onclick="toggleExpect(this)">📱 UPI / Online</button>
+        <button class="expect-chip" onclick="toggleExpect(this)">🏦 Bank Transfer</button>
+        <button class="expect-chip" onclick="toggleExpect(this)">✅ Any Method</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Advance Payment?</label>
+      <div class="expect-chips">
+        <button class="expect-chip selected" onclick="toggleExpect(this)">❌ No advance needed</button>
+        <button class="expect-chip" onclick="toggleExpect(this)">25% advance</button>
+        <button class="expect-chip" onclick="toggleExpect(this)">50% advance</button>
+        <button class="expect-chip" onclick="toggleExpect(this)">Full payment upfront</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Other Expectations</label>
+      <div class="expect-chips">
+        <button class="expect-chip" onclick="toggleExpect(this)">📞 Call before ordering</button>
+        <button class="expect-chip" onclick="toggleExpect(this)">⏰ Order 1 day before</button>
+        <button class="expect-chip" onclick="toggleExpect(this)">🚫 No cancellations</button>
+        <button class="expect-chip" onclick="toggleExpect(this)">📦 Bring your own bags</button>
+        <button class="expect-chip" onclick="toggleExpect(this)">🔄 Regular orders preferred</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Message to Buyers</label>
+      <textarea placeholder="e.g. I am a small farmer and every order matters to me. Please order on time and I will always deliver the freshest produce from my farm. Looking forward to serving you! 🙏"></textarea>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-block">
+    <h3>Ready to Go Live? 🌾</h3>
+    <p>Your listing will be visible to buyers in your area instantly. Remember — FarmDirect takes ₹0 commission. All profit is yours.</p>
+    <button class="btn-publish" onclick="publishListing()">🚀 Publish Listing Now</button>
+    <button class="btn-draft" onclick="saveDraft()">💾 Save as Draft — Publish Later</button>
+  </div>
+
+</div><!-- end page -->
+
+<!-- SUCCESS POPUP -->
+<div class="popup-overlay" id="successPopup">
+  <div class="popup">
+    <div class="popup-icon">🎉</div>
+    <h2>Your Listing is Live!</h2>
+    <p>Buyers in your area can now see and order your produce directly. No middlemen. Full profit to you!</p>
+    <div class="popup-stats">
+      <div class="popup-stat">
+        <div class="popup-stat-val">247</div>
+        <div class="popup-stat-label">Buyers Nearby</div>
+      </div>
+      <div class="popup-stat">
+        <div class="popup-stat-val">₹0</div>
+        <div class="popup-stat-label">Commission</div>
+      </div>
+      <div class="popup-stat">
+        <div class="popup-stat-val">Live</div>
+        <div class="popup-stat-label">Status</div>
+      </div>
+    </div>
+    <button class="popup-btn" onclick="closePopup()">📋 View My Listing</button>
+    <button class="popup-btn2" onclick="closePopup()">+ Add Another Product</button>
+  </div>
+</div>
+
+<script>
+  function selectCrop(btn, name) {
+    document.querySelectorAll('.crop-chip').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    document.getElementById('cropInput').value = name;
+  }
+
+  function setUnit(btn, unit) {
+    document.querySelectorAll('.unit-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('qtyUnit').textContent = 'Total ' + unit + ' available';
+  }
+
+  function checkPrice(val) {
+    const fb = document.getElementById('priceFeedback');
+    if (!val) { fb.className = 'price-feedback'; return; }
+    const n = parseFloat(val);
+    if (n >= 18 && n <= 25) {
+      fb.className = 'price-feedback show great';
+      fb.innerHTML = '🌟 Great price! Buyers will love this — you\'re saving them ₹' + (40 - n) + '/kg vs market';
+    } else if (n < 18) {
+      fb.className = 'price-feedback show good';
+      fb.innerHTML = '💚 Fair price! Consider ₹18–25 to earn more while still beating market rates';
+    } else {
+      fb.className = 'price-feedback show good';
+      fb.innerHTML = '✅ Premium price set. Make sure your quality matches for best results!';
+    }
+  }
+
+  function addBulkRow() {
+    const row = document.createElement('div');
+    row.className = 'bulk-row';
+    row.innerHTML = `<span>Buy</span><input type="number" placeholder="20" style="max-width:70px"/><span>kg or more →</span><span>₹</span><input type="number" placeholder="14"/><span>/kg</span>`;
+    document.getElementById('bulkRows').appendChild(row);
+  }
+
+  function selectMethod(card, type) {
+    document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    document.getElementById('organicInputs').style.display = type === 'organic' ? 'block' : 'none';
+    document.getElementById('chemicalInputs').style.display = type === 'chemical' ? 'block' : 'none';
+  }
+
+  function toggleInput(btn, type) {
+    btn.classList.toggle('selected-' + type);
+  }
+
+  function toggleDelivery(opt) {
+    document.querySelectorAll('.delivery-opt').forEach(o => {
+      o.classList.remove('selected');
+      o.querySelector('.delivery-check').textContent = '';
+    });
+    opt.classList.add('selected');
+    opt.querySelector('.delivery-check').textContent = '✓';
+  }
+
+  function toggleExpect(btn) { btn.classList.toggle('selected'); }
+
+  function triggerPhoto(slot) {
+    const names = { main: 'main photo', 2: 'photo 2', 3: 'photo 3', 4: 'photo 4', 5: 'photo 5' };
+    alert('📸 Opening camera / gallery for ' + names[slot] + '...\n\n(In the real app, this opens your phone camera!)');
+  }
+
+  function publishListing() {
+    document.getElementById('successPopup').classList.add('show');
+  }
+
+  function closePopup() {
+    document.getElementById('successPopup').classList.remove('show');
+  }
+
+  function saveDraft() {
+    const btn = document.querySelector('.nav-save');
+    btn.textContent = '✅ Saved!';
+    setTimeout(() => btn.textContent = 'Save Draft', 2000);
+  }
+
+  // Set today's date as default harvest date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('harvestDate').value = today;
+</script>
+
+<!-- BOTTOM NAVIGATION -->
+<div style="position:fixed;bottom:0;left:0;right:0;background:#1a4a2e;border-top:2px solid #2d7a4f;display:flex;z-index:9999;padding:8px 0 16px;">
+  <a href="index.html" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;">
+    <span style="font-size:1.3rem;">&#127968;</span>
+    <span style="font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.5);font-family:sans-serif;">Home</span>
+  </a>
+  <a href="farmdirect-browse.html" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;">
+    <span style="font-size:1.3rem;">&#128722;</span>
+    <span style="font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.5);font-family:sans-serif;">Shop</span>
+  </a>
+  <a href="farmdirect-signup.html" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;">
+    <span style="font-size:1.3rem;">&#128104;&#8205;&#127806;</span>
+    <span style="font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.5);font-family:sans-serif;">Farmer</span>
+  </a>
+  <a href="farmdirect-listing.html" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;">
+    <span style="font-size:1.3rem;">&#128203;</span>
+    <span style="font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.5);font-family:sans-serif;">List</span>
+  </a>
+  <a href="farmdirect-chat.html" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;">
+    <span style="font-size:1.3rem;">&#128172;</span>
+    <span style="font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.5);font-family:sans-serif;">Chat</span>
+  </a>
+  <a href="farmdirect-delivery.html" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;">
+    <span style="font-size:1.3rem;">&#128666;</span>
+    <span style="font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.5);font-family:sans-serif;">Track</span>
+  </a>
+</div>
+<div style="height:70px;"></div>
+</body>
+</html>
