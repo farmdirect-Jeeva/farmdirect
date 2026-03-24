@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FarmDirect — Buyer Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Mukta',sans-serif;background:#f0f4f0;min-height:100vh;padding-bottom:80px;}
+
+  /* TOP BAR */
+  .topbar{
+    background:linear-gradient(135deg,#0077b6,#023e8a);
+    padding:16px 20px 28px;position:sticky;top:0;z-index:100;
+  }
+  .topbar-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .buyer-greet{display:flex;align-items:center;gap:12px;}
+  .buyer-avatar{
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,#f5c842,#e8854a);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.4rem;border:2px solid rgba(255,255,255,0.3);
+  }
+  .greet-text h3{color:white;font-weight:800;font-size:0.95rem;}
+  .greet-text p{color:rgba(255,255,255,0.6);font-size:0.75rem;}
+  .topbar-actions{display:flex;gap:8px;}
+  .top-btn{
+    background:rgba(255,255,255,0.15);border:none;
+    color:white;width:38px;height:38px;border-radius:10px;
+    font-size:1rem;cursor:pointer;position:relative;
+  }
+  .notif-dot{
+    position:absolute;top:6px;right:6px;
+    width:8px;height:8px;border-radius:50%;
+    background:#f5c842;border:1px solid #023e8a;
+  }
+
+  /* SEARCH BAR */
+  .search-wrap{position:relative;}
+  .search-wrap input{
+    width:100%;padding:11px 16px 11px 40px;
+    border-radius:12px;border:none;outline:none;
+    font-family:'Mukta',sans-serif;font-size:0.92rem;
+    background:rgba(255,255,255,0.95);color:#1a2e1a;
+  }
+  .search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:0.9rem;}
+
+  /* SECTION */
+  .section{padding:16px 16px 0;}
+  .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .section-title{font-weight:800;font-size:1rem;color:#1a2e1a;}
+  .see-all{font-size:0.78rem;font-weight:700;color:#0077b6;text-decoration:none;}
+
+  /* SAVINGS BANNER */
+  .savings-banner{
+    background:linear-gradient(135deg,#f5c842,#e8854a);
+    border-radius:18px;padding:18px;margin:16px 16px 0;
+    display:flex;align-items:center;gap:14px;
+  }
+  .savings-icon{font-size:2.5rem;flex-shrink:0;}
+  .savings-info h3{font-weight:800;font-size:1rem;color:#1a2e1a;}
+  .savings-info p{font-size:0.78rem;color:rgba(26,46,26,0.7);margin-top:3px;}
+  .savings-amount{margin-left:auto;text-align:center;flex-shrink:0;}
+  .savings-val{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:#1a2e1a;}
+  .savings-label{font-size:0.65rem;color:rgba(26,46,26,0.6);font-weight:700;}
+
+  /* STATS ROW */
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .stat-card{
+    background:white;border-radius:14px;padding:14px 10px;
+    text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    animation:fadeUp 0.4s ease both;
+  }
+  .stat-icon{font-size:1.4rem;margin-bottom:6px;}
+  .stat-val{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:#023e8a;}
+  .stat-label{font-size:0.65rem;color:#7a9a7a;font-weight:600;margin-top:2px;}
+
+  /* QUICK ACTIONS */
+  .quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .quick-action{
+    background:white;border-radius:14px;padding:14px 8px;
+    text-align:center;cursor:pointer;transition:all 0.2s;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);text-decoration:none;
+  }
+  .quick-action:hover{transform:translateY(-3px);}
+  .qa-icon{font-size:1.5rem;margin-bottom:5px;}
+  .qa-label{font-size:0.65rem;font-weight:700;color:#3d5a3d;}
+
+  /* CATEGORY STRIP */
+  .cat-strip{
+    display:flex;gap:10px;overflow-x:auto;
+    scrollbar-width:none;padding-bottom:4px;
+  }
+  .cat-strip::-webkit-scrollbar{display:none;}
+  .cat-chip{
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:10px 16px;border-radius:14px;border:2px solid #d4e8d4;
+    background:white;cursor:pointer;white-space:nowrap;flex-shrink:0;
+    transition:all 0.2s;font-family:'Mukta',sans-serif;
+  }
+  .cat-chip.active{background:#e3f2fd;border-color:#0077b6;}
+  .cat-chip-icon{font-size:1.2rem;}
+  .cat-chip-name{font-size:0.65rem;font-weight:700;color:#3d5a3d;}
+  .cat-chip.active .cat-chip-name{color:#023e8a;}
+
+  /* NEARBY FARMS */
+  .farm-card{
+    background:white;border-radius:16px;padding:16px;
+    margin-bottom:10px;display:flex;gap:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    animation:fadeUp 0.4s ease both;cursor:pointer;
+    transition:all 0.2s;
+  }
+  .farm-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,0.1);}
+  .farm-avatar{
+    width:52px;height:52px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.6rem;flex-shrink:0;
+  }
+  .farm-info{flex:1;min-width:0;}
+  .farm-name{font-weight:800;font-size:0.92rem;color:#1a2e1a;}
+  .farm-location{font-size:0.72rem;color:#7a9a7a;margin-top:2px;}
+  .farm-stats{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
+  .farm-stat{font-size:0.68rem;font-weight:700;}
+  .farm-stat.green{color:#2d7a4f;}
+  .farm-stat.orange{color:#e65100;}
+  .farm-stat.blue{color:#0077b6;}
+  .farm-action{text-align:right;flex-shrink:0;}
+  .farm-distance{font-size:0.72rem;color:#7a9a7a;margin-bottom:6px;}
+  .shop-btn{
+    background:#e3f2fd;color:#023e8a;border:none;
+    padding:6px 12px;border-radius:8px;
+    font-family:'Mukta',sans-serif;font-weight:700;
+    font-size:0.75rem;cursor:pointer;white-space:nowrap;
+  }
+
+  /* PRODUCT CARDS HORIZONTAL */
+  .products-scroll{
+    display:flex;gap:12px;overflow-x:auto;
+    scrollbar-width:none;padding-bottom:8px;
+  }
+  .products-scroll::-webkit-scrollbar{display:none;}
+  .product-mini{
+    background:white;border-radius:16px;padding:14px;
+    min-width:160px;flex-shrink:0;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    cursor:pointer;transition:all 0.2s;
+  }
+  .product-mini:hover{transform:translateY(-2px);}
+  .product-mini-img{
+    height:80px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:2.8rem;margin-bottom:10px;
+  }
+  .product-mini-name{font-weight:700;font-size:0.88rem;color:#1a2e1a;}
+  .product-mini-farmer{font-size:0.7rem;color:#7a9a7a;margin-top:2px;}
+  .product-mini-price{font-weight:800;color:#2d7a4f;font-size:0.95rem;margin-top:4px;}
+  .product-mini-save{font-size:0.65rem;color:#e65100;font-weight:700;}
+  .add-mini-btn{
+    width:100%;margin-top:8px;padding:7px;
+    background:linear-gradient(135deg,#2d7a4f,#1a4a2e);
+    color:white;border:none;border-radius:8px;
+    font-family:'Mukta',sans-serif;font-weight:700;
+    font-size:0.75rem;cursor:pointer;
+  }
+
+  /* ORDERS */
+  .order-card{
+    background:white;border-radius:16px;padding:16px;
+    margin-bottom:10px;display:flex;gap:12px;align-items:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  }
+  .order-icon{
+    width:48px;height:48px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.5rem;flex-shrink:0;
+  }
+  .order-info{flex:1;}
+  .order-name{font-weight:700;font-size:0.9rem;color:#1a2e1a;}
+  .order-farmer{font-size:0.72rem;color:#7a9a7a;margin-top:2px;}
+  .order-chips{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;}
+  .order-chip{font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:50px;}
+  .chip-green{background:#e8f5ed;color:#2d7a4f;}
+  .chip-orange{background:#fff3e0;color:#e65100;}
+  .chip-blue{background:#e3f2fd;color:#1565c0;}
+  .chip-red{background:#ffebee;color:#c62828;}
+  .order-right{text-align:right;flex-shrink:0;}
+  .order-price{font-weight:800;font-size:1rem;color:#1a2e1a;}
+  .track-btn{
+    margin-top:6px;padding:5px 10px;
+    background:#e3f2fd;color:#023e8a;border:none;
+    border-radius:8px;font-family:'Mukta',sans-serif;
+    font-weight:700;font-size:0.7rem;cursor:pointer;
+  }
+
+  /* WISHLIST */
+  .wishlist-scroll{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+  .wishlist-scroll::-webkit-scrollbar{display:none;}
+  .wishlist-item{
+    background:white;border-radius:14px;padding:12px;
+    min-width:120px;flex-shrink:0;text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);cursor:pointer;
+  }
+  .wishlist-icon{font-size:2rem;margin-bottom:6px;}
+  .wishlist-name{font-size:0.75rem;font-weight:700;color:#1a2e1a;}
+  .wishlist-price{font-size:0.78rem;font-weight:800;color:#2d7a4f;margin-top:3px;}
+  .wishlist-heart{font-size:0.7rem;color:#e84a4a;}
+
+  /* BOTTOM NAV */
+  .bottom-nav{
+    position:fixed;bottom:0;left:0;right:0;
+    background:white;border-top:1px solid #d4e8d4;
+    display:flex;padding:10px 0 18px;z-index:100;
+    box-shadow:0 -4px 16px rgba(0,0,0,0.08);
+  }
+  .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;}
+  .nav-icon{font-size:1.3rem;}
+  .nav-label{font-size:0.62rem;font-weight:700;color:#aaa;}
+  .nav-item.active .nav-label{color:#0077b6;}
+
+  /* CART FAB */
+  .cart-fab{
+    position:fixed;bottom:76px;right:20px;
+    background:linear-gradient(135deg,#0077b6,#023e8a);
+    border:none;color:white;width:56px;height:56px;
+    border-radius:50%;font-size:1.4rem;cursor:pointer;
+    box-shadow:0 6px 20px rgba(0,119,182,0.45);
+    display:flex;align-items:center;justify-content:center;
+    z-index:99;transition:all 0.2s;position:fixed;
+  }
+  .cart-fab:hover{transform:scale(1.1);}
+  .cart-count{
+    position:absolute;top:-4px;right:-4px;
+    background:#e84a4a;color:white;width:20px;height:20px;
+    border-radius:50%;font-size:0.7rem;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    border:2px solid white;
+  }
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-row1">
+    <div class="buyer-greet">
+      <div class="buyer-avatar">🛒</div>
+      <div class="greet-text">
+        <h3>Good Morning, Priya! 🌅</h3>
+        <p>📍 Coimbatore · 12 farmers nearby</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="top-btn" onclick="alert('🔔 Your order is out for delivery!')">
+        🔔<div class="notif-dot"></div>
+      </button>
+      <button class="top-btn" onclick="window.location.href='farmdirect-chat.html'">💬</button>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="Search tomatoes, spinach, rice..."/>
+  </div>
+</div>
+
+<!-- SAVINGS BANNER -->
+<div class="savings-banner">
+  <div class="savings-icon">🎉</div>
+  <div class="savings-info">
+    <h3>You've saved this month!</h3>
+    <p>vs buying from market middlemen</p>
+  </div>
+  <div class="savings-amount">
+    <div class="savings-val">₹840</div>
+    <div class="savings-label">Total Saved</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="section" style="margin-top:16px;">
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon">📦</div>
+      <div class="stat-val">8</div>
+      <div class="stat-label">Orders Placed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👨‍🌾</div>
+      <div class="stat-val">5</div>
+      <div class="stat-label">Farmers Known</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">❤️</div>
+      <div class="stat-val">12</div>
+      <div class="stat-label">Wishlist Items</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK ACTIONS -->
+<div class="section" style="margin-top:16px;">
+  <div class="quick-actions">
+    <a class="quick-action" href="farmdirect-browse.html">
+      <div class="qa-icon">🛒</div>
+      <div class="qa-label">Shop Now</div>
+    </a>
+    <a class="quick-action" href="farmdirect-delivery.html">
+      <div class="qa-icon">🚚</div>
+      <div class="qa-label">Track Order</div>
+    </a>
+    <a class="quick-action" href="farmdirect-chat.html">
+      <div class="qa-icon">💬</div>
+      <div class="qa-label">Chat Farmer</div>
+    </a>
+    <a class="quick-action" href="#wishlist">
+      <div class="qa-icon">❤️</div>
+      <div class="qa-label">Wishlist</div>
+    </a>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="section" style="margin-top:16px;">
+  <div class="section-header">
+    <div class="section-title">🌿 Browse by Category</div>
+  </div>
+  <div class="cat-strip">
+    <div class="cat-chip active"><div class="cat-chip-icon">🌿</div><div class="cat-chip-name">All</div></div>
+    <div class="cat-chip"><div class="cat-chip-icon">🥬</div><div class="cat-chip-name">Veggies</div></div>
+    <div class="cat-chip"><div class="cat-chip-icon">🍎</div><div class="cat-chip-name">Fruits</div></div>
+    <div class="cat-chip"><div class="cat-chip-icon">🌾</div><div class="cat-chip-name">Grains</div></div>
+    <div class="cat-chip"><div class="cat-chip-icon">🥛</div><div class="cat-chip-name">Dairy</div></div>
+    <div class="cat-chip"><div class="cat-chip-icon">🌶️</div><div class="cat-chip-name">Spices</div></div>
+  </div>
+</div>
+
+<!-- FRESH TODAY -->
+<div class="section" style="margin-top:16px;">
+  <div class="section-header">
+    <div class="section-title">🌅 Fresh Today — Harvested This Morning</div>
+    <a href="farmdirect-browse.html" class="see-all">See all →</a>
+  </div>
+  <div class="products-scroll">
+    <div class="product-mini" onclick="window.location.href='farmdirect-browse.html'">
+      <div class="product-mini-img" style="background:#e8f5ed;">🍅</div>
+      <div class="product-mini-name">Tomatoes</div>
+      <div class="product-mini-farmer">👨‍🌾 Rajan · 3.2km</div>
+      <div class="product-mini-price">₹18/kg</div>
+      <div class="product-mini-save">Save ₹22 vs market!</div>
+      <button class="add-mini-btn" onclick="event.stopPropagation();alert('🛒 Added to cart!')">+ Add</button>
+    </div>
+    <div class="product-mini" onclick="window.location.href='farmdirect-browse.html'">
+      <div class="product-mini-img" style="background:#e8f5ed;">🥬</div>
+      <div class="product-mini-name">Spinach</div>
+      <div class="product-mini-farmer">👩‍🌾 Meena · 4.1km</div>
+      <div class="product-mini-price">₹12/bunch</div>
+      <div class="product-mini-save">Save ₹18 vs market!</div>
+      <button class="add-mini-btn" onclick="event.stopPropagation();alert('🛒 Added to cart!')">+ Add</button>
+    </div>
+    <div class="product-mini" onclick="window.location.href='farmdirect-browse.html'">
+      <div class="product-mini-img" style="background:#fff3e0;">🥭</div>
+      <div class="product-mini-name">Mangoes</div>
+      <div class="product-mini-farmer">👩‍🌾 Lakshmi · 6km</div>
+      <div class="product-mini-price">₹85/kg</div>
+      <div class="product-mini-save">Save ₹65 vs market!</div>
+      <button class="add-mini-btn" onclick="event.stopPropagation();alert('🛒 Added to cart!')">+ Add</button>
+    </div>
+    <div class="product-mini" onclick="window.location.href='farmdirect-browse.html'">
+      <div class="product-mini-img" style="background:#e8f5ed;">🌶️</div>
+      <div class="product-mini-name">Green Chilli</div>
+      <div class="product-mini-farmer">👨‍🌾 Suresh · 5km</div>
+      <div class="product-mini-price">₹30/kg</div>
+      <div class="product-mini-save">Save ₹20 vs market!</div>
+      <button class="add-mini-btn" onclick="event.stopPropagation();alert('🛒 Added to cart!')">+ Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEARBY FARMERS -->
+<div class="section" style="margin-top:16px;">
+  <div class="section-header">
+    <div class="section-title">📍 Farmers Near You</div>
+    <a href="farmdirect-browse.html" class="see-all">See all →</a>
+  </div>
+
+  <div class="farm-card" onclick="window.location.href='farmdirect-browse.html'">
+    <div class="farm-avatar" style="background:#e8f5ed;">👨‍🌾</div>
+    <div class="farm-info">
+      <div class="farm-name">Rajan Kumar</div>
+      <div class="farm-location">📍 Kinathukadavu · Organic Farmer</div>
+      <div class="farm-stats">
+        <span class="farm-stat green">🌿 18 yrs</span>
+        <span class="farm-stat orange">📦 2,400kg sold</span>
+        <span class="farm-stat blue">⭐ 4.9</span>
+      </div>
+    </div>
+    <div class="farm-action">
+      <div class="farm-distance">3.2 km</div>
+      <button class="shop-btn" onclick="event.stopPropagation();window.location.href='farmdirect-browse.html'">Shop →</button>
+    </div>
+  </div>
+
+  <div class="farm-card" onclick="window.location.href='farmdirect-browse.html'">
+    <div class="farm-avatar" style="background:#fff3e0;">👩‍🌾</div>
+    <div class="farm-info">
+      <div class="farm-name">Meena Devi</div>
+      <div class="farm-location">📍 Pollachi · 25 Years Experience</div>
+      <div class="farm-stats">
+        <span class="farm-stat green">🌱 25 yrs</span>
+        <span class="farm-stat orange">📦 5,100kg sold</span>
+        <span class="farm-stat blue">⭐ 4.8</span>
+      </div>
+    </div>
+    <div class="farm-action">
+      <div class="farm-distance">5.8 km</div>
+      <button class="shop-btn" onclick="event.stopPropagation();window.location.href='farmdirect-browse.html'">Shop →</button>
+    </div>
+  </div>
+
+  <div class="farm-card" onclick="window.location.href='farmdirect-browse.html'">
+    <div class="farm-avatar" style="background:#e8f5ed;">👩‍🌾</div>
+    <div class="farm-info">
+      <div class="farm-name">Lakshmi Devi</div>
+      <div class="farm-location">📍 Annur · Mango Specialist</div>
+      <div class="farm-stats">
+        <span class="farm-stat green">🥭 30 yrs</span>
+        <span class="farm-stat orange">📦 8,200kg sold</span>
+        <span class="farm-stat blue">⭐ 4.9</span>
+      </div>
+    </div>
+    <div class="farm-action">
+      <div class="farm-distance">11.4 km</div>
+      <button class="shop-btn" onclick="event.stopPropagation();window.location.href='farmdirect-browse.html'">Shop →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MY ORDERS -->
+<div class="section" style="margin-top:16px;">
+  <div class="section-header">
+    <div class="section-title">📦 My Recent Orders</div>
+    <a href="farmdirect-delivery.html" class="see-all">Track all →</a>
+  </div>
+
+  <div class="order-card">
+    <div class="order-icon" style="background:#e8f5ed;">🍅</div>
+    <div class="order-info">
+      <div class="order-name">Tomatoes × 5 kg</div>
+      <div class="order-farmer">👨‍🌾 Rajan Kumar</div>
+      <div class="order-chips">
+        <span class="order-chip chip-orange">🛵 Out for delivery</span>
+        <span class="order-chip chip-blue">ETA 18 mins</span>
+      </div>
+    </div>
+    <div class="order-right">
+      <div class="order-price">₹90</div>
+      <button class="track-btn" onclick="window.location.href='farmdirect-delivery.html'">Track →</button>
+    </div>
+  </div>
+
+  <div class="order-card">
+    <div class="order-icon" style="background:#e8f5ed;">🥬</div>
+    <div class="order-info">
+      <div class="order-name">Spinach × 3 bunches</div>
+      <div class="order-farmer">👩‍🌾 Meena Devi</div>
+      <div class="order-chips">
+        <span class="order-chip chip-green">✅ Delivered</span>
+        <span class="order-chip chip-green">⭐ Rate now</span>
+      </div>
+    </div>
+    <div class="order-right">
+      <div class="order-price">₹36</div>
+      <button class="track-btn" onclick="alert('⭐ Rate your experience!')">Rate →</button>
+    </div>
+  </div>
+</div>
+
+<!-- WISHLIST -->
+<div class="section" id="wishlist" style="margin-top:16px;">
+  <div class="section-header">
+    <div class="section-title">❤️ Your Wishlist</div>
+    <a href="farmdirect-browse.html" class="see-all">Browse more →</a>
+  </div>
+  <div class="wishlist-scroll">
+    <div class="wishlist-item">
+      <div class="wishlist-icon">🥭</div>
+      <div class="wishlist-name">Alphonso Mangoes</div>
+      <div class="wishlist-price">₹85/kg</div>
+      <div class="wishlist-heart">❤️ Saved</div>
+    </div>
+    <div class="wishlist-item">
+      <div class="wishlist-icon">🍚</div>
+      <div class="wishlist-name">Ponni Rice</div>
+      <div class="wishlist-price">₹52/kg</div>
+      <div class="wishlist-heart">❤️ Saved</div>
+    </div>
+    <div class="wishlist-item">
+      <div class="wishlist-icon">🥕</div>
+      <div class="wishlist-name">Fresh Carrots</div>
+      <div class="wishlist-price">₹28/kg</div>
+      <div class="wishlist-heart">❤️ Saved</div>
+    </div>
+    <div class="wishlist-item">
+      <div class="wishlist-icon">🧅</div>
+      <div class="wishlist-name">Red Onions</div>
+      <div class="wishlist-price">₹22/kg</div>
+      <div class="wishlist-heart">❤️ Saved</div>
+    </div>
+  </div>
+</div>
+
+<!-- CART FAB -->
+<button class="cart-fab" onclick="window.location.href='farmdirect-browse.html'">
+  🛒
+  <div class="cart-count">3</div>
+</button>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <a class="nav-item active" href="buyer-dashboard.html">
+    <div class="nav-icon">🏠</div>
+    <div class="nav-label" style="color:#0077b6;">Home</div>
+  </a>
+  <a class="nav-item" href="farmdirect-browse.html">
+    <div class="nav-icon">🛒</div>
+    <div class="nav-label">Shop</div>
+  </a>
+  <a class="nav-item" href="farmdirect-delivery.html">
+    <div class="nav-icon">🚚</div>
+    <div class="nav-label">Orders</div>
+  </a>
+  <a class="nav-item" href="farmdirect-chat.html">
+    <div class="nav-icon">💬</div>
+    <div class="nav-label">Chat</div>
+  </a>
+  <a class="nav-item" href="#">
+    <div class="nav-icon">👤</div>
+    <div class="nav-label">Profile</div>
+  </a>
+</div>
+
+</body>
+</html>
