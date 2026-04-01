@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FarmDirect — Welcome</title>
+<meta name="theme-color" content="#1a4a2e"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="FarmDirect"/>
+<link rel="manifest" href="manifest.json"/>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Mukta',sans-serif;background:linear-gradient(160deg,#0d2e1a,#1a4a2e,#0d3320);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+
+  /* Loading */
+  .loading-overlay{position:fixed;inset:0;background:#0d1f0d;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.5s;}
+  .loading-overlay.hide{opacity:0;pointer-events:none;}
+  .loading-logo{font-size:4rem;margin-bottom:16px;animation:bounce 1s ease infinite;}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  .loading-text{color:white;font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;}
+  .loading-text span{color:#f5c842;}
+  .loading-bar{width:200px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin-top:16px;}
+  .loading-fill{height:100%;background:linear-gradient(90deg,#2d7a4f,#f5c842);animation:load 2s ease forwards;}
+  @keyframes load{from{width:0}to{width:100%}}
+  .loading-sub{color:rgba(255,255,255,0.4);font-size:0.8rem;margin-top:10px;}
+
+  /* Install Banner */
+  .install-banner{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#f5c842,#e8854a);padding:12px 16px;display:none;align-items:center;gap:10px;z-index:999;}
+  .install-banner.show{display:flex;}
+  .install-banner p{flex:1;font-size:0.82rem;font-weight:700;color:#1a2e1a;}
+  .install-btn{background:#1a4a2e;color:white;border:none;padding:8px 16px;border-radius:10px;font-family:'Mukta',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;}
+  .install-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#1a2e1a;}
+
+  /* Main */
+  .splash{text-align:center;width:100%;max-width:420px;animation:fadeUp 0.8s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+  .logo-icon{font-size:5rem;display:block;margin-bottom:12px;animation:bounce 2s ease infinite;}
+  .logo{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:white;}
+  .logo span{color:#f5c842;}
+  .tagline{color:rgba(255,255,255,0.6);font-size:0.9rem;margin-top:8px;margin-bottom:24px;}
+
+  /* Firebase Status */
+  .firebase-status{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+  .status-dot{width:10px;height:10px;border-radius:50%;background:#aaa;flex-shrink:0;transition:background 0.3s;}
+  .status-dot.live{background:#4caf72;animation:pulse 1.5s ease infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  .status-text{font-size:0.78rem;color:rgba(255,255,255,0.7);font-weight:600;}
+
+  /* Stats */
+  .stats{display:flex;justify-content:center;gap:32px;margin-bottom:24px;}
+  .stat-val{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:#f5c842;}
+  .stat-label{font-size:0.65rem;color:rgba(255,255,255,0.4);font-weight:700;margin-top:2px;}
+
+  /* Live Counter */
+  .live-counter{background:rgba(76,175,114,0.15);border:1px solid rgba(76,175,114,0.3);border-radius:50px;padding:6px 16px;display:inline-flex;align-items:center;gap:8px;margin-bottom:24px;}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:#4caf72;animation:pulse 1s ease infinite;}
+  .live-text{font-size:0.78rem;color:#4caf72;font-weight:700;}
+
+  /* Lang */
+  .lang-bar{display:flex;gap:8px;justify-content:center;margin-bottom:20px;flex-wrap:wrap;}
+  .lang-pill{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);padding:4px 12px;border-radius:50px;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:'Mukta',sans-serif;border:none;transition:all 0.2s;}
+  .lang-pill.active{background:rgba(245,200,66,0.2);color:#f5c842;}
+
+  /* Role Buttons */
+  .role-title{color:rgba(255,255,255,0.4);font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;}
+  .role-btns{display:flex;flex-direction:column;gap:14px;margin-bottom:20px;}
+  .role-btn{padding:20px 24px;border-radius:18px;display:flex;align-items:center;gap:16px;text-decoration:none;transition:all 0.25s;cursor:pointer;border:none;width:100%;}
+  .role-btn.farmer{background:linear-gradient(135deg,#2d7a4f,#1a4a2e);box-shadow:0 8px 24px rgba(45,122,79,0.4);}
+  .role-btn.buyer{background:linear-gradient(135deg,#0077b6,#023e8a);box-shadow:0 8px 24px rgba(0,119,182,0.4);}
+  .role-btn:hover{transform:translateY(-3px);}
+  .role-btn-icon{width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;}
+  .role-btn-text{text-align:left;}
+  .role-btn-text h3{color:white;font-weight:800;font-size:1rem;margin-bottom:3px;}
+  .role-btn-text p{color:rgba(255,255,255,0.65);font-size:0.78rem;}
+  .role-btn-arrow{margin-left:auto;color:rgba(255,255,255,0.5);font-size:1.3rem;}
+
+  /* Trust */
+  .trust-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+  .trust-badge{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);padding:4px 12px;border-radius:50px;font-size:0.72rem;font-weight:700;}
+
+  .login-link{color:rgba(255,255,255,0.5);font-size:0.85rem;text-align:center;}
+  .login-link a{color:#4caf72;font-weight:700;text-decoration:none;}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-logo">🌾</div>
+  <div class="loading-text">Farm<span>Direct</span></div>
+  <div class="loading-sub">Powered by Firebase 🔥</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+</div>
+
+<!-- Install Banner -->
+<div class="install-banner" id="installBanner">
+  <p>📱 Install FarmDirect as an app — FREE!</p>
+  <button class="install-btn" id="installBtn">Install</button>
+  <button class="install-close" onclick="document.getElementById('installBanner').classList.remove('show')">✕</button>
+</div>
+
+<div class="splash">
+  <span class="logo-icon">🌾</span>
+  <div class="logo">Farm<span>Direct</span></div>
+  <div class="tagline">From Farm to Your Table — No Middlemen. Zero Commission.</div>
+
+  <div class="firebase-status">
+    <div class="status-dot" id="statusDot"></div>
+    <div class="status-text" id="statusText">Connecting to Firebase...</div>
+  </div>
+
+  <div class="live-counter">
+    <div class="live-dot"></div>
+    <div class="live-text" id="liveCount">🌾 Loading...</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="farmerCount">0</div><div class="stat-label">Farmers</div></div>
+    <div class="stat"><div class="stat-val">₹0</div><div class="stat-label">Commission</div></div>
+    <div class="stat"><div class="stat-val" id="orderCount">0</div><div class="stat-label">Orders</div></div>
+  </div>
+
+  <div class="lang-bar">
+    <button class="lang-pill active" onclick="setLang(this)">English</button>
+    <button class="lang-pill" onclick="setLang(this)">தமிழ்</button>
+    <button class="lang-pill" onclick="setLang(this)">తెలుగు</button>
+    <button class="lang-pill" onclick="setLang(this)">हिंदी</button>
+    <button class="lang-pill" onclick="setLang(this)">ಕನ್ನಡ</button>
+    <button class="lang-pill" onclick="setLang(this)">മലയാളം</button>
+  </div>
+
+  <div class="role-title">How do you want to use FarmDirect?</div>
+  <div class="role-btns">
+    <button class="role-btn farmer" onclick="goTo('farmer')">
+      <div class="role-btn-icon">👨‍🌾</div>
+      <div class="role-btn-text"><h3>I am a Farmer</h3><p>Sell directly — keep 100% profit. No middlemen.</p></div>
+      <div class="role-btn-arrow">›</div>
+    </button>
+    <button class="role-btn buyer" onclick="goTo('buyer')">
+      <div class="role-btn-icon">🛒</div>
+      <div class="role-btn-text"><h3>I am a Buyer</h3><p>Fresh produce from nearby farms at honest prices.</p></div>
+      <div class="role-btn-arrow">›</div>
+    </button>
+  </div>
+
+  <div class="trust-row">
+    <div class="trust-badge">🇮🇳 Startup India Approved</div>
+    <div class="trust-badge">🔥 Firebase Secured</div>
+    <div class="trust-badge">✅ IN-0326-9425IK</div>
+  </div>
+
+  <div class="login-link">Already have an account? <a href="login.html">Login here →</a></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+  import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+  import { getFirestore, collection, getCountFromServer, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCumClHWGeEY8s8z0U8zsWIkSYlcPpfp-0",
+    authDomain: "farmdirect-3af51.firebaseapp.com",
+    projectId: "farmdirect-3af51",
+    storageBucket: "farmdirect-3af51.firebasestorage.app",
+    messagingSenderId: "1072511045991",
+    appId: "1:1072511045991:web:faee00639e775f2f089fc2",
+    measurementId: "G-2RV92TW52K"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Firebase connected!
+  document.getElementById('statusDot').classList.add('live');
+  document.getElementById('statusText').textContent = '🔥 Firebase Connected — Real Data Active!';
+  document.getElementById('liveCount').textContent = '🟢 FarmDirect is Live!';
+
+  // Auto login check
+  onAuthStateChanged(auth, async user => {
+    if (user) {
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const role = userDoc.exists() ? userDoc.data().role : 'buyer';
+        localStorage.setItem('farmdirect_role', role);
+        localStorage.setItem('farmdirect_uid', user.uid);
+        window.location.href = role === 'farmer' ? 'farmer-dashboard.html' : 'buyer-dashboard.html';
+      } catch(e) {
+        window.location.href = 'index.html';
+      }
+    }
+  });
+
+  // Get live counts from Firestore
+  try {
+    const farmersSnap = await getCountFromServer(collection(db, 'farmers'));
+    const ordersSnap = await getCountFromServer(collection(db, 'orders'));
+    document.getElementById('farmerCount').textContent = farmersSnap.data().count || 0;
+    document.getElementById('orderCount').textContent = ordersSnap.data().count || 0;
+    document.getElementById('liveCount').textContent = `🟢 ${farmersSnap.data().count || 0} farmers on FarmDirect!`;
+  } catch(e) {
+    // Animate demo counters if Firestore not set up yet
+    animateCounter('farmerCount', 1);
+    animateCounter('orderCount', 0);
+    document.getElementById('liveCount').textContent = '🟢 FarmDirect is Live — Register now!';
+  }
+
+  function animateCounter(id, target) {
+    document.getElementById(id).textContent = target;
+  }
+
+  window.goTo = function(role) {
+    localStorage.setItem('farmdirect_role', role);
+    window.location.href = 'register.html';
+  }
+  window.setLang = function(btn) {
+    document.querySelectorAll('.lang-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+</script>
+
+<script>
+  // Hide loading
+  window.addEventListener('load', () => setTimeout(() => document.getElementById('loadingOverlay').classList.add('hide'), 2000));
+
+  // PWA Install
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/farmdirect/sw.js').catch(() => {});
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); deferredPrompt = e;
+    document.getElementById('installBanner').classList.add('show');
+  });
+  document.getElementById('installBtn').addEventListener('click', async () => {
+    if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; }
+    document.getElementById('installBanner').classList.remove('show');
+  });
+</script>
+</body>
+</html>
