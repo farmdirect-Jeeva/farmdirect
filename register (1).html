@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FarmDirect — Register</title>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Mukta',sans-serif;background:#0d1f0d;min-height:100vh;}
+  .header{background:linear-gradient(135deg,#1a4a2e,#0d2e1a);padding:40px 24px 36px;text-align:center;position:relative;}
+  .back-btn{position:absolute;top:16px;left:16px;background:rgba(255,255,255,0.1);border:none;color:white;width:36px;height:36px;border-radius:10px;font-size:1rem;cursor:pointer;}
+  .logo{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:white;margin-bottom:4px;}
+  .logo span{color:#f5c842;}
+  .tagline{color:rgba(255,255,255,0.6);font-size:0.85rem;}
+  .progress-bar{display:flex;gap:4px;padding:0 24px;margin-top:-12px;position:relative;z-index:10;}
+  .prog-step{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.2);transition:background 0.3s;}
+  .prog-step.done{background:#4caf72;}
+  .prog-step.active{background:#f5c842;}
+  .card{background:white;border-radius:24px;margin:16px;padding:24px;margin-bottom:40px;}
+  .step-panel{display:none;}
+  .step-panel.active{display:block;animation:fadeIn 0.3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .step-title{font-weight:800;font-size:1.1rem;color:#1a2e1a;margin-bottom:4px;}
+  .step-sub{font-size:0.82rem;color:#7a9a7a;margin-bottom:20px;}
+  .role-cards{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;}
+  .role-card{padding:20px;border-radius:16px;border:2px solid #d4e8d4;cursor:pointer;transition:all 0.2s;text-align:center;}
+  .role-card.selected{border-color:#2d7a4f;background:#e8f5ed;}
+  .role-card .rc-icon{font-size:2.5rem;margin-bottom:8px;}
+  .role-card h3{font-weight:800;font-size:1rem;color:#1a2e1a;}
+  .role-card p{font-size:0.78rem;color:#7a9a7a;margin-top:3px;}
+  .form-group{margin-bottom:16px;}
+  label{display:block;font-weight:700;font-size:0.85rem;color:#1a2e1a;margin-bottom:6px;}
+  input,select{width:100%;padding:12px 14px;border:2px solid #d4e8d4;border-radius:12px;font-family:'Mukta',sans-serif;font-size:0.95rem;color:#1a2e1a;outline:none;transition:all 0.2s;background:white;}
+  input:focus,select:focus{border-color:#2d7a4f;box-shadow:0 0 0 3px rgba(45,122,79,0.1);}
+  input::placeholder{color:#aaa;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .pass-wrap{position:relative;}
+  .pass-wrap input{padding-right:48px;}
+  .eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1rem;cursor:pointer;}
+  .alert{padding:12px 16px;border-radius:12px;margin-bottom:14px;font-size:0.88rem;font-weight:600;display:none;}
+  .alert.show{display:block;}
+  .alert.error{background:#ffebee;color:#c62828;border:1px solid #ffcdd2;}
+  .alert.success{background:#e8f5ed;color:#1a4a2e;border:1px solid #c8e6c9;}
+  .terms{display:flex;gap:10px;align-items:flex-start;margin:12px 0;}
+  .terms input[type=checkbox]{width:18px;height:18px;margin-top:2px;flex-shrink:0;}
+  .terms label{font-size:0.8rem;color:#7a9a7a;font-weight:400;}
+  .terms a{color:#2d7a4f;font-weight:700;}
+  .btn-next{width:100%;padding:14px;margin-top:8px;background:linear-gradient(135deg,#2d7a4f,#1a4a2e);color:white;border:none;border-radius:14px;font-family:'Mukta',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 16px rgba(45,122,79,0.3);}
+  .btn-next:disabled{opacity:0.6;cursor:not-allowed;}
+  .btn-back{width:100%;padding:12px;margin-top:8px;background:transparent;color:#7a9a7a;border:2px solid #d4e8d4;border-radius:14px;font-family:'Mukta',sans-serif;font-weight:700;cursor:pointer;}
+  .spinner{display:none;width:24px;height:24px;border:3px solid rgba(255,255,255,0.3);border-top:3px solid white;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .success-screen{text-align:center;padding:20px 0;}
+  .success-icon{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#4caf72,#2d7a4f);display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin:0 auto 20px;box-shadow:0 8px 24px rgba(45,122,79,0.35);animation:popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275) both;}
+  @keyframes popIn{from{opacity:0;transform:scale(0.5)}to{opacity:1;transform:scale(1)}}
+  .success-screen h2{font-family:'Playfair Display',serif;font-size:1.5rem;color:#1a2e1a;margin-bottom:8px;}
+  .success-screen p{color:#7a9a7a;font-size:0.88rem;margin-bottom:20px;}
+  .login-link{text-align:center;margin-top:16px;font-size:0.88rem;color:#7a9a7a;}
+  .login-link a{color:#2d7a4f;font-weight:800;text-decoration:none;}
+  .helper{font-size:0.75rem;color:#aaa;margin-top:4px;}
+  .strength-bar{height:4px;border-radius:2px;margin-top:6px;transition:all 0.3s;background:#d4e8d4;}
+  .strength-bar.weak{background:#e84a4a;width:33%;}
+  .strength-bar.medium{background:#f5c842;width:66%;}
+  .strength-bar.strong{background:#4caf72;width:100%;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <button class="back-btn" onclick="history.back()">←</button>
+  <div class="logo">🌾 Farm<span>Direct</span></div>
+  <div class="tagline">Create your free account!</div>
+</div>
+
+<div class="progress-bar">
+  <div class="prog-step active" id="p1"></div>
+  <div class="prog-step" id="p2"></div>
+  <div class="prog-step" id="p3"></div>
+</div>
+
+<div class="card">
+
+  <!-- STEP 1: ROLE -->
+  <div class="step-panel active" id="step1">
+    <div class="step-title">Who are you? 👋</div>
+    <div class="step-sub">Step 1 of 3 — Choose your role</div>
+    <div class="role-cards">
+      <div class="role-card" id="farmer-card" onclick="selectRole('farmer')">
+        <div class="rc-icon">👨‍🌾</div>
+        <h3>I am a Farmer</h3>
+        <p>Sell your produce directly. Keep 100% profit. No middlemen.</p>
+      </div>
+      <div class="role-card" id="buyer-card" onclick="selectRole('buyer')">
+        <div class="rc-icon">🛒</div>
+        <h3>I am a Buyer</h3>
+        <p>Buy fresh produce directly from farmers at honest prices.</p>
+      </div>
+    </div>
+    <button class="btn-next" onclick="goStep(2)">Continue →</button>
+  </div>
+
+  <!-- STEP 2: DETAILS -->
+  <div class="step-panel" id="step2">
+    <div class="step-title">Your Details 📋</div>
+    <div class="step-sub">Step 2 of 3 — Create your account</div>
+
+    <div class="alert error" id="errorAlert2"></div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>First Name *</label>
+        <input type="text" id="firstName" placeholder="e.g. Rajan"/>
+      </div>
+      <div class="form-group">
+        <label>Last Name *</label>
+        <input type="text" id="lastName" placeholder="e.g. Kumar"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Mobile Number *</label>
+      <input type="tel" id="mobile" placeholder="+91 9XXXXXXXXX" maxlength="13"/>
+      <p class="helper">Used for delivery notifications</p>
+    </div>
+    <div class="form-group">
+      <label>Email Address *</label>
+      <input type="email" id="regEmail" placeholder="yourname@email.com"/>
+    </div>
+    <div class="form-group">
+      <label>State *</label>
+      <select id="state">
+        <option value="">Select State</option>
+        <option>Tamil Nadu</option>
+        <option>Andhra Pradesh</option>
+        <option>Telangana</option>
+        <option>Karnataka</option>
+        <option>Kerala</option>
+        <option>Maharashtra</option>
+        <option>Punjab</option>
+        <option>Uttar Pradesh</option>
+        <option>Gujarat</option>
+        <option>Rajasthan</option>
+        <option>West Bengal</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>District *</label>
+      <input type="text" id="district" placeholder="e.g. Coimbatore"/>
+    </div>
+    <div class="form-group">
+      <label>Password *</label>
+      <div class="pass-wrap">
+        <input type="password" id="regPass" placeholder="Minimum 6 characters" oninput="checkStrength(this.value)"/>
+        <button class="eye-btn" onclick="togglePass('regPass',this)">👁️</button>
+      </div>
+      <div class="strength-bar" id="strengthBar"></div>
+      <p class="helper" id="strengthText">Enter password to see strength</p>
+    </div>
+    <div class="form-group">
+      <label>Confirm Password *</label>
+      <div class="pass-wrap">
+        <input type="password" id="regPass2" placeholder="Re-enter password"/>
+        <button class="eye-btn" onclick="togglePass('regPass2',this)">👁️</button>
+      </div>
+    </div>
+    <div class="terms">
+      <input type="checkbox" id="terms"/>
+      <label for="terms">I agree to FarmDirect's <a href="#">Terms</a> and <a href="#">Privacy Policy</a>. My data is kept safe and never shared with third parties.</label>
+    </div>
+    <button class="btn-next" id="registerBtn" onclick="handleRegister()">
+      <span id="regBtnText">🌾 Create My Account!</span>
+      <div class="spinner" id="regSpinner"></div>
+    </button>
+    <button class="btn-back" onclick="goStep(1)">← Back</button>
+  </div>
+
+  <!-- STEP 3: SUCCESS -->
+  <div class="step-panel" id="step3">
+    <div class="success-screen">
+      <div class="success-icon">🌾</div>
+      <h2 id="successName">Welcome to FarmDirect!</h2>
+      <p id="successMsg">Your account has been created successfully with Firebase! You are now part of India's zero commission farmer marketplace!</p>
+      <button class="btn-next" onclick="goToDashboard()">🚀 Go to Dashboard</button>
+      <div class="login-link" style="margin-top:12px;">
+        Already registered? <a href="login.html">Login here</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+  import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+  import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCumClHWGeEY8s8z0U8zsWIkSYlcPpfp-0",
+    authDomain: "farmdirect-3af51.firebaseapp.com",
+    projectId: "farmdirect-3af51",
+    storageBucket: "farmdirect-3af51.firebasestorage.app",
+    messagingSenderId: "1072511045991",
+    appId: "1:1072511045991:web:faee00639e775f2f089fc2",
+    measurementId: "G-2RV92TW52K"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  window.handleRegister = async function() {
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const mobile = document.getElementById('mobile').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const state = document.getElementById('state').value;
+    const district = document.getElementById('district').value.trim();
+    const pass = document.getElementById('regPass').value;
+    const pass2 = document.getElementById('regPass2').value;
+    const terms = document.getElementById('terms').checked;
+
+    if (!firstName || !lastName || !email || !state || !district || !pass) {
+      showError2('⚠️ Please fill all required fields!'); return;
+    }
+    if (!email.includes('@')) { showError2('⚠️ Enter a valid email!'); return; }
+    if (pass.length < 6) { showError2('⚠️ Password must be at least 6 characters!'); return; }
+    if (pass !== pass2) { showError2('⚠️ Passwords do not match!'); return; }
+    if (!terms) { showError2('⚠️ Please agree to Terms & Privacy Policy!'); return; }
+
+    setRegLoading(true);
+
+    try {
+      // Create Firebase Auth account
+      const result = await createUserWithEmailAndPassword(auth, email, pass);
+      const user = result.user;
+
+      // Update display name
+      await updateProfile(user, { displayName: `${firstName} ${lastName}` });
+
+      // Save user data to Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        name: `${firstName} ${lastName}`,
+        firstName,
+        lastName,
+        email,
+        mobile,
+        state,
+        district,
+        role: window._selectedRole,
+        createdAt: serverTimestamp(),
+        verified: false,
+        rating: 0,
+        totalOrders: 0,
+      });
+
+      // If farmer — create farmer profile too
+      if (window._selectedRole === 'farmer') {
+        await setDoc(doc(db, 'farmers', user.uid), {
+          uid: user.uid,
+          name: `${firstName} ${lastName}`,
+          mobile,
+          state,
+          district,
+          verified: false,
+          listings: 0,
+          totalSales: 0,
+          rating: 0,
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      // Save to localStorage
+      localStorage.setItem('farmdirect_uid', user.uid);
+      localStorage.setItem('farmdirect_role', window._selectedRole);
+      localStorage.setItem('farmdirect_name', `${firstName} ${lastName}`);
+
+      // Show success
+      document.getElementById('successName').textContent = `Welcome ${firstName}! 🎉`;
+      document.getElementById('successMsg').textContent =
+        `Your ${window._selectedRole} account has been created successfully! ` +
+        `Your data is securely stored in Firebase. You are now part of India's zero commission farmer marketplace!`;
+
+      goStep(3);
+
+    } catch(error) {
+      setRegLoading(false);
+      const msgs = {
+        'auth/email-already-in-use': '❌ This email is already registered! Please login instead.',
+        'auth/invalid-email': '❌ Invalid email address!',
+        'auth/weak-password': '❌ Password is too weak! Use at least 6 characters.',
+        'auth/network-request-failed': '❌ Network error! Check your internet.',
+      };
+      showError2(msgs[error.code] || '❌ Registration failed: ' + error.message);
+    }
+  }
+
+  function setRegLoading(loading) {
+    const btn = document.getElementById('registerBtn');
+    const txt = document.getElementById('regBtnText');
+    const spin = document.getElementById('regSpinner');
+    btn.disabled = loading;
+    txt.style.display = loading ? 'none' : 'inline';
+    spin.style.display = loading ? 'block' : 'none';
+  }
+
+  function showError2(msg) {
+    const e = document.getElementById('errorAlert2');
+    e.textContent = msg; e.classList.add('show');
+    setRegLoading(false);
+  }
+</script>
+
+<script>
+  window._selectedRole = '';
+  let currentStep = 1;
+
+  function selectRole(role) {
+    window._selectedRole = role;
+    document.getElementById('farmer-card').classList.toggle('selected', role === 'farmer');
+    document.getElementById('buyer-card').classList.toggle('selected', role === 'buyer');
+  }
+
+  function goStep(n) {
+    if (n === 2 && !window._selectedRole) { alert('Please select your role first!'); return; }
+    document.getElementById('step' + currentStep).classList.remove('active');
+    currentStep = n;
+    document.getElementById('step' + n).classList.add('active');
+    for (let i = 1; i <= 3; i++) {
+      const el = document.getElementById('p' + i);
+      if (!el) continue;
+      el.className = 'prog-step' + (i < n ? ' done' : i === n ? ' active' : '');
+    }
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  function goToDashboard() {
+    const role = localStorage.getItem('farmdirect_role');
+    window.location.href = role === 'farmer' ? 'farmer-dashboard.html' : 'buyer-dashboard.html';
+  }
+
+  function togglePass(id, btn) {
+    const i = document.getElementById(id);
+    i.type = i.type === 'password' ? 'text' : 'password';
+    btn.textContent = i.type === 'password' ? '👁️' : '🙈';
+  }
+
+  function checkStrength(val) {
+    const bar = document.getElementById('strengthBar');
+    const txt = document.getElementById('strengthText');
+    if (!val) { bar.className = 'strength-bar'; txt.textContent = 'Enter password'; return; }
+    const strong = val.length >= 8 && /[A-Z]/.test(val) && /[0-9]/.test(val);
+    const medium = val.length >= 6;
+    if (strong) { bar.className = 'strength-bar strong'; txt.textContent = '✅ Strong password!'; txt.style.color = '#4caf72'; }
+    else if (medium) { bar.className = 'strength-bar medium'; txt.textContent = '⚠️ Medium — add numbers/uppercase'; txt.style.color = '#e65100'; }
+    else { bar.className = 'strength-bar weak'; txt.textContent = '❌ Too weak — minimum 6 characters'; txt.style.color = '#c62828'; }
+  }
+</script>
+</body>
+</html>
